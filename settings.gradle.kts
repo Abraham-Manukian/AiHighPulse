@@ -24,3 +24,4 @@ rootProject.name = "AiHighPulse"
 include(":shared")
 include(":app-android")
 include(":app-ios")
+include(":core-designsystem")

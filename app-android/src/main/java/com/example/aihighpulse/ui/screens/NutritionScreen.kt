@@ -14,7 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
-import com.example.aihighpulse.ui.components.PlaceholderScreen
+import com.example.aihighpulse.core.designsystem.components.PlaceholderScreen
 import com.example.aihighpulse.ui.state.UiState
 import com.example.aihighpulse.ui.vm.NutritionViewModel
 

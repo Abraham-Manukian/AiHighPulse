@@ -31,6 +31,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.example.aihighpulse.R
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -60,11 +62,11 @@ fun AppRoot() {
     val nav = rememberNavController()
 
     val destinations = listOf(
-        TopLevelDestination(Routes.Home, "Home", Icons.Filled.Home),
-        TopLevelDestination(Routes.Workout, "Workout", Icons.Filled.FitnessCenter),
-        TopLevelDestination(Routes.Nutrition, "Nutrition", Icons.Filled.LunchDining),
-        TopLevelDestination(Routes.Sleep, "Sleep", Icons.Filled.Bedtime),
-        TopLevelDestination(Routes.Progress, "Progress", Icons.Filled.BarChart),
+        TopLevelDestination(Routes.Home, stringResource(R.string.nav_home), Icons.Filled.Home),
+        TopLevelDestination(Routes.Workout, stringResource(R.string.nav_workout), Icons.Filled.FitnessCenter),
+        TopLevelDestination(Routes.Nutrition, stringResource(R.string.nav_nutrition), Icons.Filled.LunchDining),
+        TopLevelDestination(Routes.Sleep, stringResource(R.string.nav_sleep), Icons.Filled.Bedtime),
+        TopLevelDestination(Routes.Progress, stringResource(R.string.nav_progress), Icons.Filled.BarChart),
     )
 
     val backStackEntry by nav.currentBackStackEntryAsState()
@@ -162,4 +164,3 @@ data class TopLevelDestination(
     val label: String,
     val icon: ImageVector,
 )
-

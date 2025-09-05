@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
+import com.example.aihighpulse.core.designsystem.components.PlaceholderScreen
 import com.example.aihighpulse.ui.vm.PaywallViewModel
 
 @Composable

@@ -8,7 +8,13 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 .DS_Store
-/build
+# Ignore all module build outputs
+**/build/
+**/.transforms/
+**/intermediates/
+**/outputs/
+*.apk
+*.dex
 /captures
 .externalNativeBuild
 .cxx
