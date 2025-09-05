@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
-import com.example.aihighpulse.ui.components.StatChip
+import com.example.aihighpulse.core.designsystem.components.StatChip
 import com.example.aihighpulse.ui.navigation.Routes
 import com.example.aihighpulse.ui.vm.HomeViewModel
 
