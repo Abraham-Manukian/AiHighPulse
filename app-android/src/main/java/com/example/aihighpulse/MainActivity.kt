@@ -1,13 +1,14 @@
 package com.example.aihighpulse
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bedtime
@@ -32,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import com.example.aihighpulse.R
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -41,16 +43,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.aihighpulse.ui.navigation.Routes
+import com.example.aihighpulse.ui.navigation.nutritionDetail
 import com.example.aihighpulse.ui.screens.*
+import com.example.aihighpulse.ui.theme.AiHighPulseTheme
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    AppRoot()
-                }
+            AiHighPulseTheme {
+                Surface(modifier = Modifier.fillMaxSize()) { AppRoot() }
             }
         }
     }
@@ -101,8 +103,8 @@ fun AppRoot() {
                             NavigationBarItem(
                                 selected = selected,
                                 onClick = { if (!selected) navigateSingleTopTo(nav, dest.route) },
-                                icon = { Icon(dest.icon, contentDescription = dest.label) },
-                                label = { Text(dest.label) }
+                                icon = { Icon(dest.icon, contentDescription = dest.label, modifier = Modifier.size(28.dp)) },
+                                label = { Text(dest.label, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                             )
                         }
                     }
@@ -143,7 +145,17 @@ fun AppNavHost(nav: NavHostController) {
         }
         composable(Routes.Home) { HomeScreen(onNavigate = { nav.navigate(it) }) }
         composable(Routes.Workout) { WorkoutScreen() }
-        composable(Routes.Nutrition) { NutritionScreen() }
+        composable(Routes.Nutrition) {
+            NutritionScreen(
+                onOpenMeal = { day, index -> nav.navigate(Routes.nutritionDetail(day, index)) }
+            )
+        }
+        composable(Routes.NutritionDetail) { backStack ->
+            val day = backStack.arguments?.getString("day") ?: "Mon"
+            val index = backStack.arguments?.getString("index")?.toIntOrNull() ?: 0
+            NutritionDetailScreen(day = day, index = index, onBack = { nav.popBackStack() })
+        }
+        composable(Routes.ShoppingList) { ShoppingListScreen(onBack = { nav.popBackStack() }) }
         composable(Routes.Sleep) { SleepScreen() }
         composable(Routes.Progress) { ProgressScreen() }
         composable(Routes.Paywall) { PaywallScreen() }

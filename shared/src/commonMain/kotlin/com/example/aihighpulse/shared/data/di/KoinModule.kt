@@ -49,7 +49,7 @@ class LocalTrainingRepository : TrainingRepository {
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
         val w = List(3) { day ->
             Workout(
-                id = "w_${weekIndex}_$day",
+                id = "w_${'$'}weekIndex_${'$'}day",
                 date = today,
                 sets = listOf(
                     WorkoutSet(exerciseId = "squat", reps = 8, weightKg = 40.0, rpe = 7.5),

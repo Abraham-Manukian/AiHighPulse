@@ -2,7 +2,10 @@ package com.example.aihighpulse.ui.vm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.aihighpulse.shared.domain.model.*
+import com.example.aihighpulse.shared.domain.model.Advice
+import com.example.aihighpulse.shared.domain.model.Goal
+import com.example.aihighpulse.shared.domain.model.Profile
+import com.example.aihighpulse.shared.domain.model.Sex
 import com.example.aihighpulse.shared.domain.repository.AdviceRepository
 import com.example.aihighpulse.shared.domain.repository.ProfileRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +13,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-data class SleepState(val tips: List<String> = listOf("Ложитесь в одно и то же время", "Темнота и прохлада в спальне"))
+data class SleepState(
+    val tips: List<String> = listOf("Sleep 7-9 hours", "Keep a consistent schedule", "Avoid caffeine after 16:00"),
+    val weeklyHours: List<Int> = listOf(7, 7, 6, 8, 7, 9, 8),
+    val syncing: Boolean = false,
+)
 
 class SleepViewModel(
     private val adviceRepository: AdviceRepository,
@@ -24,6 +31,15 @@ class SleepViewModel(
             val profile = profileRepository.getProfile() ?: Profile("local", 28, Sex.MALE, 178, 75.0, Goal.MAINTAIN, 3)
             val advice = runCatching { adviceRepository.getAdvice(profile, mapOf("topic" to "sleep")) }.getOrNull()
             if (advice != null) _state.value = SleepState(advice.messages)
+        }
+    }
+
+    fun sync() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(syncing = true)
+            // TODO integrate Health Connect / HealthKit
+            kotlinx.coroutines.delay(800)
+            _state.value = _state.value.copy(syncing = false)
         }
     }
 }

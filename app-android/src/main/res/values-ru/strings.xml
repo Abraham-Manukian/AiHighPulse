@@ -8,7 +8,7 @@
     <string name="nav_sleep">Сон</string>
     <string name="nav_progress">Прогресс</string>
     <string name="nav_settings">Настройки</string>
-    <string name="nav_pro">Подписка</string>
+    <string name="nav_pro">Pro</string>
 
     <!-- Home -->
     <string name="home_today">Сегодня</string>
@@ -17,11 +17,12 @@
     <string name="home_sleep_hours">Сон</string>
     <string name="home_quick_actions">Быстрые действия</string>
     <string name="home_workout_today_title">Тренировка на сегодня</string>
-    <string name="home_workout_today_sub">Полное тело · 45 мин · 8 упражнений</string>
+    <string name="home_workout_today_sub">Фулбоди — 45 мин — 8 упражнений</string>
     <string name="home_start">Начать</string>
     <string name="home_preview">Просмотр</string>
     <string name="home_nutrition_title">Питание</string>
     <string name="home_open_menu">Открыть меню</string>
+    <string name="home_macros_sample">Белки 120 г  Жиры 60 г  Углеводы 250 г</string>
 
     <!-- Onboarding -->
     <string name="onboard_title">Добро пожаловать в AiHighPulse</string>
@@ -30,22 +31,94 @@
     <string name="label_height_cm">Рост, см</string>
     <string name="label_weight_kg">Вес, кг</string>
     <string name="label_sex">Пол</string>
-    <string name="sex_male">Муж</string>
-    <string name="sex_female">Жен</string>
+    <string name="sex_male">Мужской</string>
+    <string name="sex_female">Женский</string>
     <string name="sex_other">Другое</string>
     <string name="label_goal">Цель</string>
     <string name="goal_lose_fat">Сушка</string>
     <string name="goal_maintain">Поддержание</string>
     <string name="goal_gain_muscle">Масса</string>
     <string name="label_experience">Опыт: %1$d</string>
-    <string name="label_equipment">Инвентарь через запятую</string>
-    <string name="label_dietary_prefs">Пищевые предпочтения</string>
+    <string name="label_equipment">Оборудование (через запятую)</string>
+    <string name="label_dietary_prefs">Предпочтения в питании</string>
     <string name="label_allergies">Аллергии</string>
     <string name="label_weekdays">Дни недели</string>
     <string name="save_and_continue">Сохранить и продолжить</string>
-    <string name="error_invalid_input">Проверьте корректность данных</string>
+    <string name="error_invalid_input">Проверьте корректность введенных данных</string>
 
     <!-- Generic -->
     <string name="loading">Загрузка</string>
     <string name="error_generic">Что-то пошло не так</string>
+
+    <!-- Workout -->
+    <string name="workout_add_set_title">Добавить подход</string>
+    <string name="workout_exercise_label">Упражнение</string>
+    <string name="workout_reps_label">Повторы</string>
+    <string name="workout_weight_label">Вес</string>
+    <string name="workout_add_button">Добавить</string>
+    <string name="workout_rest_timer_title">Таймер отдыха</string>
+    <string name="workout_rest_start">Старт</string>
+    <string name="workout_rest_stop">Стоп</string>
+
+    <!-- Nutrition -->
+    <string name="action_refresh">Обновить</string>
+    <string name="nutrition_loading_title">Загружаем меню</string>
+    <string name="nutrition_error_title">Не удалось загрузить</string>
+    <string name="nutrition_error_hint">Попробуйте позже</string>
+    <string name="nutrition_macros_chart_title">Разбивка макросов</string>
+    <string name="nutrition_tab_menu">Меню</string>
+    <string name="nutrition_tab_shopping">Список покупок</string>
+    <string name="nutrition_day_totals">Итоги за день</string>
+    <string name="nutrition_week_totals">Итоги за неделю</string>
+    <string name="nutrition_detail_title">Детали блюда</string>
+    <string name="nutrition_detail_missing">Блюдо не найдено</string>
+    <string name="nutrition_ingredients">Ингредиенты</string>
+    <string name="action_back">Назад</string>
+
+    <!-- Sleep -->
+    <string name="sleep_title">Советы по сну</string>
+
+    <!-- Progress -->
+    <string name="progress_title">Статистика</string>
+    <string name="progress_total_workouts">Всего тренировок: %1$d</string>
+    <string name="progress_total_sets">Всего подходов: %1$d</string>
+    <string name="progress_total_volume">Общий объем: %1$d кг</string>
+    <string name="progress_weekly_volume">Недельный объём</string>
+    <string name="progress_empty_hint">Пока нет данных. Начните первую тренировку.</string>
+    <string name="dow_mon">Пн</string>
+    <string name="dow_tue">Вт</string>
+    <string name="dow_wed">Ср</string>
+    <string name="dow_thu">Чт</string>
+    <string name="dow_fri">Пт</string>
+    <string name="dow_sat">Сб</string>
+    <string name="dow_sun">Вс</string>
+
+    <!-- Settings -->
+    <string name="settings_no_profile_title">Профиль ещё не создан</string>
+    <string name="settings_no_profile_sub">Пройдите онбординг, чтобы создать профиль</string>
+    <string name="settings_title">Профиль</string>
+    <string name="settings_age">Возраст: %1$d</string>
+    <string name="settings_height_weight">Рост: %1$d см  Вес: %2$.1f кг</string>
+    <string name="settings_inc_weight">+0.5 кг</string>
+    <string name="settings_dec_weight">-0.5 кг</string>
+    <string name="settings_saving">Сохраняем…</string>
+    <string name="settings_language_title">Язык</string>
+    <string name="settings_language_ru">Русский</string>
+    <string name="settings_language_system">По умолчанию</string>
+    <string name="settings_units_title">Единицы измерения</string>
+    <string name="settings_units_metric">кг / см</string>
+    <string name="settings_units_imperial">фунт / дюйм</string>
+    <string name="settings_theme_title">Тема</string>
+    <string name="settings_theme_light">Светлая</string>
+    <string name="settings_theme_dark">Тёмная</string>
+    <string name="settings_theme_system">Системная</string>
+    <string name="settings_edit_profile">Редактировать профиль</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">Подписка Pro</string>
+    <string name="paywall_desc">Откройте расширенные возможности. Интеграция биллинга позже.</string>
+    <string name="paywall_active">Подписка активна</string>
+    <string name="paywall_cta">Купить (заглушка)</string>
+    <string name="paywall_monthly">Месяц</string>
+    <string name="paywall_yearly">Год</string>
 </resources>

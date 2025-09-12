@@ -49,4 +49,7 @@ dependencies {
     // DI
     implementation(libs.koin.android)
     implementation("io.insert-koin:koin-androidx-compose:3.5.6")
+
+    // SQLDelight driver (for creating driver in Android app)
+    implementation(libs.sqldelight.driver.android)
 }

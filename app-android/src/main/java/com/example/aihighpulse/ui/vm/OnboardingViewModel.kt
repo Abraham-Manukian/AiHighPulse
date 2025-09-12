@@ -2,7 +2,11 @@ package com.example.aihighpulse.ui.vm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.aihighpulse.shared.domain.model.*
+import com.example.aihighpulse.shared.domain.model.Constraints
+import com.example.aihighpulse.shared.domain.model.Equipment
+import com.example.aihighpulse.shared.domain.model.Goal
+import com.example.aihighpulse.shared.domain.model.Profile
+import com.example.aihighpulse.shared.domain.model.Sex
 import com.example.aihighpulse.shared.domain.repository.ProfileRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +22,7 @@ data class OnboardingState(
     val experienceLevel: Int = 3,
     val dietaryPreferences: String = "",
     val allergies: String = "",
-    val equipment: String = "гантели, турник",
+    val equipment: String = "dumbbells, pull-up bar",
     val days: Map<String, Boolean> = mapOf(
         "Mon" to true, "Tue" to true, "Wed" to false, "Thu" to true, "Fri" to false, "Sat" to false, "Sun" to false
     ),
@@ -40,7 +44,7 @@ class OnboardingViewModel(
         val h = s.heightCm.toIntOrNull()
         val w = s.weightKg.toDoubleOrNull()
         if (age == null || h == null || w == null) {
-            _state.value = s.copy(error = "Проверьте корректность данных")
+            _state.value = s.copy(error = "invalid")
             return
         }
         viewModelScope.launch {
@@ -66,3 +70,4 @@ class OnboardingViewModel(
         }
     }
 }
+

@@ -16,12 +16,13 @@
     <string name="home_volume">Volume</string>
     <string name="home_sleep_hours">Sleep</string>
     <string name="home_quick_actions">Quick actions</string>
-    <string name="home_workout_today_title">Todays workout</string>
-    <string name="home_workout_today_sub">Full body 3 45 min 3 8 exercises</string>
+    <string name="home_workout_today_title">Todays workout</string>
+    <string name="home_workout_today_sub">Full body - 45 min - 8 exercises</string>
     <string name="home_start">Start</string>
     <string name="home_preview">Preview</string>
     <string name="home_nutrition_title">Nutrition</string>
     <string name="home_open_menu">Open menu</string>
+    <string name="home_macros_sample">Protein 120g  Fat 60g  Carbs 250g</string>
 
     <!-- Onboarding -->
     <string name="onboard_title">Welcome to AiHighPulse</string>
@@ -48,4 +49,76 @@
     <!-- Generic -->
     <string name="loading">Loading</string>
     <string name="error_generic">Something went wrong</string>
+
+    <!-- Workout -->
+    <string name="workout_add_set_title">Add workout set</string>
+    <string name="workout_exercise_label">Exercise</string>
+    <string name="workout_reps_label">Reps</string>
+    <string name="workout_weight_label">Weight</string>
+    <string name="workout_add_button">Add</string>
+    <string name="workout_rest_timer_title">Rest timer</string>
+    <string name="workout_rest_start">Start</string>
+    <string name="workout_rest_stop">Stop</string>
+
+    <!-- Nutrition -->
+    <string name="action_refresh">Refresh</string>
+    <string name="nutrition_loading_title">Loading menu</string>
+    <string name="nutrition_error_title">Failed to load</string>
+    <string name="nutrition_error_hint">Try again later</string>
+    <string name="nutrition_macros_chart_title">Macros breakdown</string>
+    <string name="nutrition_tab_menu">Menu</string>
+    <string name="nutrition_tab_shopping">Shopping list</string>
+    <string name="nutrition_day_totals">Daily totals</string>
+    <string name="nutrition_week_totals">Weekly totals</string>
+    <string name="nutrition_detail_title">Meal details</string>
+    <string name="nutrition_detail_missing">Meal not found</string>
+    <string name="nutrition_ingredients">Ingredients</string>
+    <string name="action_back">Back</string>
+
+    <!-- Sleep -->
+    <string name="sleep_title">Sleep tips</string>
+
+    <!-- Progress -->
+    <string name="progress_title">Statistics</string>
+    <string name="progress_total_workouts">Total workouts: %1$d</string>
+    <string name="progress_total_sets">Total sets: %1$d</string>
+    <string name="progress_total_volume">Total volume: %1$d kg</string>
+    <string name="progress_weekly_volume">Weekly volume</string>
+    <string name="progress_empty_hint">No data yet. Start your first workout.</string>
+    <string name="dow_mon">Mon</string>
+    <string name="dow_tue">Tue</string>
+    <string name="dow_wed">Wed</string>
+    <string name="dow_thu">Thu</string>
+    <string name="dow_fri">Fri</string>
+    <string name="dow_sat">Sat</string>
+    <string name="dow_sun">Sun</string>
+
+    <!-- Settings -->
+    <string name="settings_no_profile_title">No profile yet</string>
+    <string name="settings_no_profile_sub">Complete onboarding to create your profile</string>
+    <string name="settings_title">Profile</string>
+    <string name="settings_age">Age: %1$d</string>
+    <string name="settings_height_weight">Height: %1$d cm  Weight: %2$.1f kg</string>
+    <string name="settings_inc_weight">+0.5 kg</string>
+    <string name="settings_dec_weight">-0.5 kg</string>
+    <string name="settings_saving">Saving...</string>
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_ru">Русский</string>
+    <string name="settings_language_system">System default</string>
+    <string name="settings_units_title">Units</string>
+    <string name="settings_units_metric">kg / cm</string>
+    <string name="settings_units_imperial">lb / in</string>
+    <string name="settings_theme_title">Theme</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_edit_profile">Edit profile</string>
+
+    <!-- Paywall -->
+    <string name="paywall_title">Pro Subscription</string>
+    <string name="paywall_desc">Unlock advanced features. Billing integration pending.</string>
+    <string name="paywall_active">Subscription is active</string>
+    <string name="paywall_cta">Purchase (stub)</string>
+    <string name="paywall_monthly">Monthly</string>
+    <string name="paywall_yearly">Yearly</string>
 </resources>

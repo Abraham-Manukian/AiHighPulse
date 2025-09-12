@@ -18,12 +18,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import com.example.aihighpulse.core.designsystem.components.StatChip
 import com.example.aihighpulse.ui.navigation.Routes
 import com.example.aihighpulse.ui.vm.HomeViewModel
+import com.example.aihighpulse.R
 
 @Composable
 fun HomeScreen(onNavigate: (String) -> Unit) {
@@ -51,11 +52,11 @@ fun HomeScreen(onNavigate: (String) -> Unit) {
 private fun OverviewCard(sets: Int, volume: Int) {
     Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation()) {
         androidx.compose.foundation.layout.Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Сегодня", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.home_today), style = MaterialTheme.typography.titleMedium)
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                StatChip("Подходы", sets.toString())
-                StatChip("Объем", "${'$'}volume кг·повт")
-                StatChip("Сон", "7ч 20м")
+                StatChip(stringResource(R.string.home_sets), sets.toString())
+                StatChip(stringResource(R.string.home_volume), "${volume} kg")
+                StatChip(stringResource(R.string.home_sleep_hours), "7h 20m")
             }
         }
     }
@@ -65,11 +66,11 @@ private fun OverviewCard(sets: Int, volume: Int) {
 private fun QuickActionCard(onNavigate: (String) -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         androidx.compose.foundation.layout.Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Быстрые действия", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.home_quick_actions), style = MaterialTheme.typography.titleMedium)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(onClick = { onNavigate(Routes.Workout) }) { Text("Тренировка") }
-                OutlinedButton(onClick = { onNavigate(Routes.Nutrition) }) { Text("Питание") }
-                OutlinedButton(onClick = { onNavigate(Routes.Sleep) }) { Text("Сон") }
+                OutlinedButton(onClick = { onNavigate(Routes.Workout) }) { Text(stringResource(R.string.nav_workout)) }
+                OutlinedButton(onClick = { onNavigate(Routes.Nutrition) }) { Text(stringResource(R.string.nav_nutrition)) }
+                OutlinedButton(onClick = { onNavigate(Routes.Sleep) }) { Text(stringResource(R.string.nav_sleep)) }
             }
         }
     }
@@ -79,11 +80,11 @@ private fun QuickActionCard(onNavigate: (String) -> Unit) {
 private fun TodayWorkoutCard(onNavigate: (String) -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         androidx.compose.foundation.layout.Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Тренировка на сегодня", style = MaterialTheme.typography.titleMedium)
-            Text("Полное тело · 45 мин · 8 упражнений", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.home_workout_today_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.home_workout_today_sub), color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(onClick = { onNavigate(Routes.Workout) }) { Text("Начать") }
-                OutlinedButton(onClick = { /* preview plan */ }) { Text("Просмотр") }
+                Button(onClick = { onNavigate(Routes.Workout) }) { Text(stringResource(R.string.home_start)) }
+                OutlinedButton(onClick = { /* preview plan */ }) { Text(stringResource(R.string.home_preview)) }
             }
         }
     }
@@ -93,11 +94,12 @@ private fun TodayWorkoutCard(onNavigate: (String) -> Unit) {
 private fun NutritionSummaryCard(onNavigate: (String) -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         androidx.compose.foundation.layout.Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Питание", style = MaterialTheme.typography.titleMedium)
-            Text("Белки 120г · Жиры 60г · Углеводы 250г", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.home_nutrition_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.home_macros_sample), color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(onClick = { onNavigate(Routes.Nutrition) }) { Text("Открыть меню") }
+                Button(onClick = { onNavigate(Routes.Nutrition) }) { Text(stringResource(R.string.home_open_menu)) }
             }
         }
     }
 }
+
