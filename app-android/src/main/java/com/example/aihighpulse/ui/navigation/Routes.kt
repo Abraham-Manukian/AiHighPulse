@@ -1,6 +1,7 @@
 package com.example.aihighpulse.ui.navigation
 
 object Routes {
+    const val Splash = "splash"
     const val Onboarding = "onboarding"
     const val Home = "home"
     const val Workout = "workout"

@@ -15,9 +15,13 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        buildConfigField("String", "API_BASE_URL", "\"https://api.example.com\"")
     }
 
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -52,4 +56,7 @@ dependencies {
 
     // SQLDelight driver (for creating driver in Android app)
     implementation(libs.sqldelight.driver.android)
+
+    // Billing
+    implementation(libs.play.billing)
 }

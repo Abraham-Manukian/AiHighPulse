@@ -30,3 +30,17 @@ interface SyncRepository {
     suspend fun syncAll(): Boolean
 }
 
+interface PreferencesRepository {
+    fun getLanguageTag(): String?
+    fun setLanguageTag(tag: String?)
+    fun getTheme(): String? // "light" | "dark" | "system"
+    fun setTheme(theme: String?)
+    fun getUnits(): String? // "metric" | "imperial"
+    fun setUnits(units: String?)
+}
+
+interface AiTrainerRepository {
+    suspend fun generateTrainingPlan(profile: Profile, weekIndex: Int): TrainingPlan?
+    suspend fun generateNutritionPlan(profile: Profile, weekIndex: Int): NutritionPlan?
+    suspend fun getSleepAdvice(profile: Profile): Advice?
+}

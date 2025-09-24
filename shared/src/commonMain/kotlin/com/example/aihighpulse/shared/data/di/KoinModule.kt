@@ -4,13 +4,20 @@ import com.example.aihighpulse.shared.data.network.ApiClient
 import com.example.aihighpulse.shared.data.network.createHttpClient
 import com.example.aihighpulse.shared.domain.model.*
 import com.example.aihighpulse.shared.domain.repository.*
+import com.example.aihighpulse.shared.data.repo.TrainingRepositoryDb
+import com.example.aihighpulse.shared.data.repo.NetworkAiTrainerRepository
+import com.example.aihighpulse.shared.data.repo.NutritionRepositoryDb
 import com.example.aihighpulse.shared.domain.usecase.*
+import com.example.aihighpulse.shared.data.repo.ProfileSettingsRepository
+import com.example.aihighpulse.shared.data.repo.ProfileRepositoryDb
+import com.example.aihighpulse.shared.data.repo.SettingsPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import com.russhwolf.settings.Settings
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -19,10 +26,15 @@ object DI {
         single { createHttpClient() }
         single { ApiClient(get(), apiBaseUrl) }
 
-        // Repositories (simple in-memory/local placeholders)
-        single<ProfileRepository> { InMemoryProfileRepository() }
-        single<TrainingRepository> { LocalTrainingRepository() }
-        single<NutritionRepository> { LocalNutritionRepository() }
+        // Settings storage
+        single { Settings() }
+
+        // Repositories
+        single<PreferencesRepository> { SettingsPreferencesRepository(get()) }
+        single<ProfileRepository> { ProfileRepositoryDb(get()) }
+        single<AiTrainerRepository> { NetworkAiTrainerRepository(get()) }
+        single<TrainingRepository> { TrainingRepositoryDb(get(), get(), get()) }
+        single<NutritionRepository> { NutritionRepositoryDb(get(), get(), get()) }
         single<AdviceRepository> { StubAdviceRepository() }
         single<PurchasesRepository> { StubPurchasesRepository() }
         single<SyncRepository> { StubSyncRepository() }

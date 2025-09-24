@@ -102,17 +102,17 @@
     <string name="settings_inc_weight">+0.5 kg</string>
     <string name="settings_dec_weight">-0.5 kg</string>
     <string name="settings_saving">Saving...</string>
-    <string name="settings_language_title">Language</string>
-    <string name="settings_language_ru">Русский</string>
-    <string name="settings_language_system">System default</string>
+    <string name="settings_edit_profile">Edit profile</string>
     <string name="settings_units_title">Units</string>
     <string name="settings_units_metric">kg / cm</string>
-    <string name="settings_units_imperial">lb / in</string>
+    <string name="settings_units_imperial">lbs / in</string>
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_ru">Russian</string>
+    <string name="settings_language_system">System default</string>
     <string name="settings_theme_title">Theme</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_system">System</string>
-    <string name="settings_edit_profile">Edit profile</string>
 
     <!-- Paywall -->
     <string name="paywall_title">Pro Subscription</string>

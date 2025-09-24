@@ -1,0 +1,56 @@
+-- Meal tables
+CREATE TABLE Meal(
+  id TEXT NOT NULL PRIMARY KEY,
+  name TEXT NOT NULL,
+  kcal INTEGER NOT NULL,
+  protein INTEGER NOT NULL,
+  fat INTEGER NOT NULL,
+  carbs INTEGER NOT NULL
+);
+
+CREATE TABLE MealIngredient(
+  mealId TEXT NOT NULL REFERENCES Meal(id) ON DELETE CASCADE,
+  ingredient TEXT NOT NULL
+);
+
+-- Mapping meals to days
+CREATE TABLE MealByDay(
+  weekIndex INTEGER NOT NULL,
+  day TEXT NOT NULL, -- Mon..Sun
+  indexInDay INTEGER NOT NULL,
+  mealId TEXT NOT NULL REFERENCES Meal(id) ON DELETE CASCADE,
+  PRIMARY KEY(weekIndex, day, indexInDay)
+);
+
+CREATE INDEX IF NOT EXISTS idx_mealbyday_week ON MealByDay(weekIndex);
+CREATE INDEX IF NOT EXISTS idx_mealingredient_meal ON MealIngredient(mealId);
+
+insertMeal:
+INSERT OR REPLACE INTO Meal(id, name, kcal, protein, fat, carbs) VALUES (?, ?, ?, ?, ?, ?);
+
+insertMealIngredient:
+INSERT INTO MealIngredient(mealId, ingredient) VALUES (?, ?);
+
+deleteIngredientsForMeal:
+DELETE FROM MealIngredient WHERE mealId = ?;
+
+insertMealByDay:
+INSERT OR REPLACE INTO MealByDay(weekIndex, day, indexInDay, mealId) VALUES (?, ?, ?, ?);
+
+selectMealsForDay:
+SELECT m.id, m.name, m.kcal, m.protein, m.fat, m.carbs, i.ingredient, b.indexInDay
+FROM MealByDay b
+JOIN Meal m ON m.id = b.mealId
+LEFT JOIN MealIngredient i ON i.mealId = m.id
+WHERE b.weekIndex = ? AND b.day = ?
+ORDER BY b.indexInDay;
+
+deleteMealsForWeek:
+DELETE FROM MealByDay WHERE weekIndex = ?;
+
+selectShoppingListForWeek:
+SELECT DISTINCT i.ingredient
+FROM MealByDay b
+JOIN MealIngredient i ON i.mealId = b.mealId
+WHERE b.weekIndex = ?
+ORDER BY i.ingredient;

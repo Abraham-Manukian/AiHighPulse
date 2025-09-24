@@ -1,0 +1,65 @@
+-- Profile detail tables
+CREATE TABLE IF NOT EXISTS ProfileEquipment(
+  profileId TEXT NOT NULL,
+  item TEXT NOT NULL,
+  PRIMARY KEY(profileId, item)
+);
+
+CREATE TABLE IF NOT EXISTS ProfileDietPref(
+  profileId TEXT NOT NULL,
+  pref TEXT NOT NULL,
+  PRIMARY KEY(profileId, pref)
+);
+
+CREATE TABLE IF NOT EXISTS ProfileAllergy(
+  profileId TEXT NOT NULL,
+  allergy TEXT NOT NULL,
+  PRIMARY KEY(profileId, allergy)
+);
+
+CREATE TABLE IF NOT EXISTS ProfileSchedule(
+  profileId TEXT NOT NULL,
+  day TEXT NOT NULL, -- Mon..Sun
+  active INTEGER NOT NULL, -- 0/1
+  PRIMARY KEY(profileId, day)
+);
+
+-- Upserts
+insertEquipment:
+INSERT OR REPLACE INTO ProfileEquipment(profileId, item) VALUES (?, ?);
+
+insertDietPref:
+INSERT OR REPLACE INTO ProfileDietPref(profileId, pref) VALUES (?, ?);
+
+insertAllergy:
+INSERT OR REPLACE INTO ProfileAllergy(profileId, allergy) VALUES (?, ?);
+
+insertSchedule:
+INSERT OR REPLACE INTO ProfileSchedule(profileId, day, active) VALUES (?, ?, ?);
+
+-- Deletes
+deleteEquipmentForProfile:
+DELETE FROM ProfileEquipment WHERE profileId = ?;
+
+deleteDietPrefForProfile:
+DELETE FROM ProfileDietPref WHERE profileId = ?;
+
+deleteAllergyForProfile:
+DELETE FROM ProfileAllergy WHERE profileId = ?;
+
+deleteScheduleForProfile:
+DELETE FROM ProfileSchedule WHERE profileId = ?;
+
+-- Selects
+selectEquipment:
+SELECT item FROM ProfileEquipment WHERE profileId = ? ORDER BY item;
+
+selectDietPrefs:
+SELECT pref FROM ProfileDietPref WHERE profileId = ? ORDER BY pref;
+
+selectAllergies:
+SELECT allergy FROM ProfileAllergy WHERE profileId = ? ORDER BY allergy;
+
+selectSchedule:
+SELECT day, active FROM ProfileSchedule WHERE profileId = ? ORDER BY day;
+

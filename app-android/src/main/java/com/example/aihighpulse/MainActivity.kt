@@ -135,7 +135,14 @@ fun AppRoot() {
 
 @Composable
 fun AppNavHost(nav: NavHostController) {
-    NavHost(navController = nav, startDestination = Routes.Onboarding) {
+    NavHost(navController = nav, startDestination = Routes.Splash) {
+        composable(Routes.Splash) {
+            SplashScreen(onReady = { start ->
+                nav.navigate(start) {
+                    popUpTo(Routes.Splash) { inclusive = true }
+                }
+            })
+        }
         composable(Routes.Onboarding) {
             OnboardingScreen(onDone = {
                 nav.navigate(Routes.Home) {

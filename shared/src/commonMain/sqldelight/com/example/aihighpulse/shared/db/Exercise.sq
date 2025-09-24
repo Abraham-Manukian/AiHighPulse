@@ -1,0 +1,17 @@
+-- Exercise dictionary
+CREATE TABLE Exercise(
+  id TEXT NOT NULL PRIMARY KEY,
+  name TEXT NOT NULL,
+  muscleGroups TEXT, -- JSON array of strings
+  difficulty INTEGER NOT NULL
+);
+
+upsertExercise:
+INSERT OR REPLACE INTO Exercise(id, name, muscleGroups, difficulty) VALUES (?, ?, ?, ?);
+
+selectExercise:
+SELECT * FROM Exercise WHERE id = ?;
+
+selectExercises:
+SELECT * FROM Exercise ORDER BY name;
+

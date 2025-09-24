@@ -1,19 +1,25 @@
 package com.example.aihighpulse.shared.domain.model
 
 import kotlinx.datetime.LocalDate
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class Goal { LOSE_FAT, GAIN_MUSCLE, MAINTAIN }
+@Serializable
 enum class Sex { MALE, FEMALE, OTHER }
 
+@Serializable
 data class Constraints(
     val injuries: List<String> = emptyList(),
     val healthNotes: List<String> = emptyList(),
 )
 
+@Serializable
 data class Equipment(
     val items: List<String> = emptyList()
 )
 
+@Serializable
 data class Profile(
     val id: String,
     val age: Int,
@@ -30,6 +36,7 @@ data class Profile(
     val budgetLevel: Int = 2 // 1 low .. 3 high
 )
 
+@Serializable
 data class Exercise(
     val id: String,
     val name: String,
@@ -40,6 +47,7 @@ data class Exercise(
     val contraindications: List<String> = emptyList(),
 )
 
+@Serializable
 data class WorkoutSet(
     val exerciseId: String,
     val reps: Int,
@@ -47,17 +55,20 @@ data class WorkoutSet(
     val rpe: Double? = null
 )
 
+@Serializable
 data class Workout(
     val id: String,
     val date: LocalDate,
     val sets: List<WorkoutSet>
 )
 
+@Serializable
 data class TrainingPlan(
     val weekIndex: Int,
     val workouts: List<Workout>
 )
 
+@Serializable
 data class Macros(
     val proteinGrams: Int,
     val fatGrams: Int,
@@ -65,6 +76,7 @@ data class Macros(
     val kcal: Int
 )
 
+@Serializable
 data class Meal(
     val name: String,
     val ingredients: List<String>,
@@ -72,12 +84,14 @@ data class Meal(
     val macros: Macros
 )
 
+@Serializable
 data class NutritionPlan(
     val weekIndex: Int,
     val mealsByDay: Map<String, List<Meal>>,
     val shoppingList: List<String>
 )
 
+@Serializable
 data class Advice(
     val messages: List<String>,
     val disclaimer: String = "Not medical advice"

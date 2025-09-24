@@ -1,0 +1,48 @@
+-- Workout and WorkoutSet tables
+CREATE TABLE Workout(
+  id TEXT NOT NULL PRIMARY KEY,
+  weekIndex INTEGER NOT NULL,
+  date TEXT NOT NULL -- ISO-8601 LocalDate
+);
+
+CREATE TABLE WorkoutSet(
+  workoutId TEXT NOT NULL REFERENCES Workout(id) ON DELETE CASCADE,
+  exerciseId TEXT NOT NULL,
+  reps INTEGER NOT NULL,
+  weightKg REAL,
+  rpe REAL
+);
+
+CREATE INDEX IF NOT EXISTS idx_workout_week ON Workout(weekIndex);
+CREATE INDEX IF NOT EXISTS idx_set_workout ON WorkoutSet(workoutId);
+
+selectAllWorkouts:
+SELECT * FROM Workout ORDER BY date;
+
+insertWorkout:
+INSERT OR REPLACE INTO Workout(id, weekIndex, date) VALUES (?, ?, ?);
+
+deleteWorkout:
+DELETE FROM Workout WHERE id = ?;
+
+deleteWorkoutsByWeek:
+DELETE FROM Workout WHERE weekIndex = ?;
+
+insertSet:
+INSERT INTO WorkoutSet(workoutId, exerciseId, reps, weightKg, rpe) VALUES (?, ?, ?, ?, ?);
+
+deleteSetsForWorkout:
+DELETE FROM WorkoutSet WHERE workoutId = ?;
+
+selectWorkoutsWithSets:
+SELECT w.id, w.date, s.exerciseId, s.reps, s.weightKg, s.rpe
+FROM Workout w
+LEFT JOIN WorkoutSet s ON s.workoutId = w.id
+ORDER BY w.date;
+
+selectWorkoutsWithSetsByWeek:
+SELECT w.id, w.date, s.exerciseId, s.reps, s.weightKg, s.rpe
+FROM Workout w
+LEFT JOIN WorkoutSet s ON s.workoutId = w.id
+WHERE w.weekIndex = ?
+ORDER BY w.date;

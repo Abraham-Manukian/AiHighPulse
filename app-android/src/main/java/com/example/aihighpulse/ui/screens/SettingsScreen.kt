@@ -26,10 +26,13 @@ import com.example.aihighpulse.ui.vm.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import com.example.aihighpulse.shared.domain.repository.PreferencesRepository
+import org.koin.androidx.compose.get
 
 @Composable
 fun SettingsScreen() {
     val vm: SettingsViewModel = koinViewModel()
+    val prefs: PreferencesRepository = get()
     val s by vm.state.collectAsState()
     val p = s.profile
     val context = LocalContext.current
@@ -76,25 +79,27 @@ fun SettingsScreen() {
         }
         Text(stringResource(R.string.settings_units_title), style = MaterialTheme.typography.titleMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            TextButton(onClick = { /* kg/cm */ }) { Text(stringResource(R.string.settings_units_metric)) }
-            TextButton(onClick = { /* lbs/in */ }) { Text(stringResource(R.string.settings_units_imperial)) }
+            TextButton(onClick = { prefs.setUnits("metric") }) { Text(stringResource(R.string.settings_units_metric)) }
+            TextButton(onClick = { prefs.setUnits("imperial") }) { Text(stringResource(R.string.settings_units_imperial)) }
         }
         Text(stringResource(R.string.settings_language_title), style = MaterialTheme.typography.titleMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             TextButton(onClick = {
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
                 (context as? Activity)?.recreate()
+                prefs.setLanguageTag("ru")
             }) { Text(stringResource(R.string.settings_language_ru)) }
             TextButton(onClick = {
                 AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
                 (context as? Activity)?.recreate()
+                prefs.setLanguageTag(null)
             }) { Text(stringResource(R.string.settings_language_system)) }
         }
         Text(stringResource(R.string.settings_theme_title), style = MaterialTheme.typography.titleMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            TextButton(onClick = { AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO); (context as? Activity)?.recreate() }) { Text(stringResource(R.string.settings_theme_light)) }
-            TextButton(onClick = { AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES); (context as? Activity)?.recreate() }) { Text(stringResource(R.string.settings_theme_dark)) }
-            TextButton(onClick = { AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM); (context as? Activity)?.recreate() }) { Text(stringResource(R.string.settings_theme_system)) }
+            TextButton(onClick = { AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO); prefs.setTheme("light"); (context as? Activity)?.recreate() }) { Text(stringResource(R.string.settings_theme_light)) }
+            TextButton(onClick = { AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES); prefs.setTheme("dark"); (context as? Activity)?.recreate() }) { Text(stringResource(R.string.settings_theme_dark)) }
+            TextButton(onClick = { AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM); prefs.setTheme("system"); (context as? Activity)?.recreate() }) { Text(stringResource(R.string.settings_theme_system)) }
         }
         if (s.saving) {
             Text(stringResource(R.string.settings_saving), color = MaterialTheme.colorScheme.onSurfaceVariant)
