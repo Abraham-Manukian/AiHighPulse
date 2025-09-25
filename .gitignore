@@ -19,3 +19,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Local environment overrides
+.env.local
+server/.env.local
+

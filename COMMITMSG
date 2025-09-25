@@ -1,8 +1,0 @@
-feat: AI trainer server + client integration; DB and localization
-
-- Add Ktor server module with Ollama LLM client and /ai endpoints
-- Integrate AiTrainerRepository on client (training/nutrition/sleep)
-- Switch to AI when subscription active, fallback to local generator
-- Add SQLDelight schema (profile/details, workouts/sets, nutrition) + DB repos
-- RU localization cleanup; settings persistence; splash route; billing skeleton
-- BuildConfig API_BASE_URL and server wiring

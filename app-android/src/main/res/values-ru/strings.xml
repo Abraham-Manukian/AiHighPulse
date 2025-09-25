@@ -9,6 +9,7 @@
     <string name="nav_progress">Прогресс</string>
     <string name="nav_settings">Настройки</string>
     <string name="nav_pro">Pro</string>
+    <string name="nav_chat">Чат</string>
 
     <!-- Home -->
     <string name="home_today">Сегодня</string>
@@ -121,4 +122,9 @@
     <string name="paywall_cta">Купить (заглушка)</string>
     <string name="paywall_monthly">Помес.</string>
     <string name="paywall_yearly">Годовая</string>
+
+    <!-- Chat -->
+    <string name="chat_title">AI Тренер</string>
+    <string name="chat_hint">Спросите тренера…</string>
+    <string name="chat_send">Отправить</string>
 </resources>

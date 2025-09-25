@@ -18,6 +18,15 @@ android {
         buildConfigField("String", "API_BASE_URL", "\"https://api.example.com\"")
     }
 
+    buildTypes {
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8080\"")
+        }
+        release {
+            buildConfigField("String", "API_BASE_URL", "\"https://api.example.com\"")
+        }
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -60,3 +69,4 @@ dependencies {
     // Billing
     implementation(libs.play.billing)
 }
+

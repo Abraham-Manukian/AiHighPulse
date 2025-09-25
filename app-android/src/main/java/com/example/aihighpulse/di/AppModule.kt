@@ -29,5 +29,6 @@ object AppModule {
         viewModel { ProgressViewModel(get()) }
         viewModel { PaywallViewModel(get()) }
         viewModel { SettingsViewModel(get()) }
+        viewModel { com.example.aihighpulse.ui.vm.ChatViewModel(get()) }
     }
 }

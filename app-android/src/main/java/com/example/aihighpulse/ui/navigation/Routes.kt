@@ -12,6 +12,7 @@ object Routes {
     const val Progress = "progress"
     const val Paywall = "paywall"
     const val Settings = "settings"
+    const val Chat = "chat"
 }
 
 fun Routes.nutritionDetail(day: String, index: Int): String =

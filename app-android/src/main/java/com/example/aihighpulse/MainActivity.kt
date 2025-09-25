@@ -1,5 +1,6 @@
 package com.example.aihighpulse
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LunchDining
+import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -58,6 +60,7 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppRoot() {
@@ -85,6 +88,9 @@ fun AppRoot() {
                     CenterAlignedTopAppBar(
                         title = { Text(currentTitle) },
                         actions = {
+                            IconButton(onClick = { nav.navigate(Routes.Chat) }) {
+                                Icon(Icons.Outlined.Chat, contentDescription = stringResource(R.string.nav_chat))
+                            }
                             IconButton(onClick = { nav.navigate(Routes.Paywall) }) {
                                 Icon(Icons.Outlined.Star, contentDescription = "Pro")
                             }
@@ -167,6 +173,7 @@ fun AppNavHost(nav: NavHostController) {
         composable(Routes.Progress) { ProgressScreen() }
         composable(Routes.Paywall) { PaywallScreen() }
         composable(Routes.Settings) { SettingsScreen() }
+        composable(Routes.Chat) { ChatScreen() }
     }
 }
 
