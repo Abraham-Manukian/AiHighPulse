@@ -44,3 +44,9 @@ interface AiTrainerRepository {
     suspend fun generateNutritionPlan(profile: Profile, weekIndex: Int): NutritionPlan?
     suspend fun getSleepAdvice(profile: Profile): Advice?
 }
+
+data class ChatMessage(val role: String, val content: String)
+
+interface ChatRepository {
+    suspend fun send(profile: Profile, history: List<ChatMessage>, userMessage: String, locale: String?): String
+}

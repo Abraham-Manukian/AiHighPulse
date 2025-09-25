@@ -1,14 +1,19 @@
 package com.example.aihighpulse.server
 
 import com.example.aihighpulse.server.llm.LLMClient
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.ZoneOffset
 
 class AiService(private val llm: LLMClient) {
     private val json = Json { ignoreUnknownKeys = true }
 
-    suspend fun training(req: AiTrainingRequest): AiTrainingResponse {
+    suspend fun training(req: AiTrainingRequest): AiTrainingResponse = runWithFallback(
+        operation = "training",
+        fallback = { fallbackTraining(req) }
+    ) {
         val prompt = buildString {
             appendLine("You are an expert strength coach and data engineer.")
             appendLine("Task: Generate a weekly training plan as STRICT JSON matching this Kotlin schema:")
@@ -20,11 +25,13 @@ class AiService(private val llm: LLMClient) {
             appendLine(json.encodeToString(AiTrainingRequest.serializer(), req))
         }
         val out = llm.generateJson(prompt)
-        return runCatching { json.decodeFromString(AiTrainingResponse.serializer(), out) }
-            .getOrElse { fallbackTraining(req) }
+        json.decodeFromString(AiTrainingResponse.serializer(), out)
     }
 
-    suspend fun nutrition(req: AiNutritionRequest): AiNutritionResponse {
+    suspend fun nutrition(req: AiNutritionRequest): AiNutritionResponse = runWithFallback(
+        operation = "nutrition",
+        fallback = { fallbackNutrition(req) }
+    ) {
         val prompt = buildString {
             appendLine("You are a sports nutritionist.")
             appendLine("Task: Generate a weekly menu as STRICT JSON matching schema:")
@@ -35,11 +42,13 @@ class AiService(private val llm: LLMClient) {
             appendLine(json.encodeToString(AiNutritionRequest.serializer(), req))
         }
         val out = llm.generateJson(prompt)
-        return runCatching { json.decodeFromString(AiNutritionResponse.serializer(), out) }
-            .getOrElse { fallbackNutrition(req) }
+        json.decodeFromString(AiNutritionResponse.serializer(), out)
     }
 
-    suspend fun sleep(req: AiAdviceRequest): AiAdviceResponse {
+    suspend fun sleep(req: AiAdviceRequest): AiAdviceResponse = runWithFallback(
+        operation = "sleep",
+        fallback = { fallbackAdvice(req) }
+    ) {
         val prompt = buildString {
             appendLine("You are a sleep coach.")
             appendLine("Task: Provide 5-7 concise personalized sleep tips as STRICT JSON:")
@@ -49,8 +58,18 @@ class AiService(private val llm: LLMClient) {
             appendLine(json.encodeToString(AiAdviceRequest.serializer(), req))
         }
         val out = llm.generateJson(prompt)
-        return runCatching { json.decodeFromString(AiAdviceResponse.serializer(), out) }
-            .getOrElse { fallbackAdvice(req) }
+        json.decodeFromString(AiAdviceResponse.serializer(), out)
+    }
+
+    private suspend fun <T> runWithFallback(
+        operation: String,
+        fallback: () -> T,
+        block: suspend () -> T
+    ): T = runCatching {
+        withTimeout(LlmTimeoutMs) { block() }
+    }.getOrElse {
+        logger.warn("LLM ${'$'}operation fallback triggered", it)
+        fallback()
     }
 
     private fun fallbackTraining(req: AiTrainingRequest): AiTrainingResponse {
@@ -68,25 +87,33 @@ class AiService(private val llm: LLMClient) {
     }
 
     private fun fallbackNutrition(req: AiNutritionRequest): AiNutritionResponse {
-        val kcal = 2200
-        val mPer = Macros(120, 60, 250, kcal / 3)
+        val totalKcal = 2100
+        val kcalPerMeal = totalKcal / 3
+        val macrosPerMeal = Macros(proteinGrams = 35, fatGrams = 18, carbsGrams = 65, kcal = kcalPerMeal)
         val mealSet = listOf(
-            AiMeal("Овсянка", listOf("овсянка", "молоко", "банан"), kcal / 3, mPer),
-            AiMeal("Курица с рисом", listOf("курица", "рис", "овощи"), kcal / 3, mPer),
-            AiMeal("Йогурт с орехами", listOf("йогурт", "орехи"), kcal / 3, mPer)
+            AiMeal("Oatmeal with Banana", listOf("oats", "milk", "banana"), kcalPerMeal, macrosPerMeal),
+            AiMeal("Chicken and Rice", listOf("chicken", "rice", "vegetables"), kcalPerMeal, macrosPerMeal),
+            AiMeal("Yogurt and Nuts", listOf("yogurt", "almonds"), kcalPerMeal, macrosPerMeal)
         )
-        val days = listOf("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
+        val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
         return AiNutritionResponse(req.weekIndex, days.associateWith { mealSet })
     }
 
     private fun fallbackAdvice(@Suppress("UNUSED_PARAMETER") req: AiAdviceRequest): AiAdviceResponse =
         AiAdviceResponse(
             messages = listOf(
-                "Ложитесь и вставайте в одно и то же время",
-                "Избегайте экранов за 60 минут до сна",
-                "Держите спальню прохладной (18–20°C)",
-                "Лёгкая прогулка и растяжка вечером",
-                "Не тренируйтесь интенсивно за 3–4 часа до сна"
-            )
+                "Keep a consistent sleep schedule, even on weekends.",
+                "Limit screens and bright light in the last hour before bed.",
+                "Aim for a cool, dark, quiet bedroom environment.",
+                "Avoid heavy meals and stimulants at least 3 hours before sleep.",
+                "Wind down with light stretching or breathing exercises.",
+                "Track your energy and adjust training loads on low sleep days."
+            ),
+            disclaimer = "Coaching tips only. Consult a medical professional for ongoing issues."
         )
+
+    companion object {
+        private const val LlmTimeoutMs = 20_000L
+        private val logger = LoggerFactory.getLogger(AiService::class.java)
+    }
 }

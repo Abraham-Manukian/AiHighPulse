@@ -6,6 +6,7 @@ import com.example.aihighpulse.shared.domain.model.*
 import com.example.aihighpulse.shared.domain.repository.*
 import com.example.aihighpulse.shared.data.repo.TrainingRepositoryDb
 import com.example.aihighpulse.shared.data.repo.NetworkAiTrainerRepository
+import com.example.aihighpulse.shared.data.repo.NetworkChatRepository
 import com.example.aihighpulse.shared.data.repo.NutritionRepositoryDb
 import com.example.aihighpulse.shared.domain.usecase.*
 import com.example.aihighpulse.shared.data.repo.ProfileSettingsRepository
@@ -33,6 +34,7 @@ object DI {
         single<PreferencesRepository> { SettingsPreferencesRepository(get()) }
         single<ProfileRepository> { ProfileRepositoryDb(get()) }
         single<AiTrainerRepository> { NetworkAiTrainerRepository(get()) }
+        single<ChatRepository> { NetworkChatRepository(get()) }
         single<TrainingRepository> { TrainingRepositoryDb(get(), get(), get()) }
         single<NutritionRepository> { NutritionRepositoryDb(get(), get(), get()) }
         single<AdviceRepository> { StubAdviceRepository() }
@@ -45,6 +47,7 @@ object DI {
         factory { GenerateNutritionPlan(get(), get()) }
         factory { SyncWithBackend(get()) }
         factory { ValidateSubscription(get()) }
+        factory { AskAiTrainer(get(), get(), get()) }
     }
 }
 // --- Simple placeholder implementations (MVP offline-first scaffolding) ---
