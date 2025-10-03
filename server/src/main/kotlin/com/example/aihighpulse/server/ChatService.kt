@@ -1,10 +1,10 @@
-﻿package com.example.aihighpulse.server
+package com.example.aihighpulse.server
 
 import com.example.aihighpulse.server.llm.LLMClient
 import java.util.Locale
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withTimeout
-import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
@@ -24,79 +24,66 @@ class ChatService(
                 ?: req.messages.lastOrNull()?.content
                 ?: ""
 
-            val trainingPlan = fetchTrainingPlan(req)
-            val nutritionPlan = fetchNutritionPlan(req)
-            val sleepAdvice = fetchSleepAdvice(req)
-
-            val history = req.messages.joinToString("\n\n") { m -> "${'$'}{m.role.uppercase()}: ${'$'}{m.content}" }
+            val history = req.messages.joinToString("\n\n") { message ->
+                "${message.role}: ${message.content}"
+            }
 
             val prompt = buildString {
-                appendLine("You are a professional AI strength coach and nutritionist guiding the same user over time.")
-                appendLine("User locale: ${'$'}localeTag ($languageDisplay). Use locale-appropriate measurement units and language.")
-                appendLine("Latest user message: \"${lastUserMessage}\" — respond to it first.")
-                appendLine("Baseline plans (use as reference, only repeat parts that change):")
-                trainingPlan?.let {
-                    appendLine("TrainingPlanJSON:")
-                    appendLine(json.encodeToString(AiTrainingResponse.serializer(), it))
+                appendLine("You are a professional AI strength coach, nutritionist, and recovery expert guiding the same user over time.")
+                appendLine("User locale: $languageDisplay ($localeTag). Reply in that language and measurement system.")
+                appendLine("Return STRICT JSON that matches this Kotlin data class (no extra text):")
+                appendLine("{\"reply\": String,")
+                appendLine(" \"trainingPlan\": {\"weekIndex\": Int, \"workouts\": [{ \"id\": String, \"date\": String(YYYY-MM-DD), \"sets\": [{ \"exerciseId\": String, \"reps\": Int, \"weightKg\": Double?, \"rpe\": Double? }] }] } | null,")
+                appendLine(" \"nutritionPlan\": {\"weekIndex\": Int, \"mealsByDay\": { DayLabel: [{ \"name\": String, \"ingredients\": [String], \"kcal\": Int, \"macros\": { \"proteinGrams\": Int, \"fatGrams\": Int, \"carbsGrams\": Int, \"kcal\": Int } }] } } | null,")
+                appendLine(" \"sleepAdvice\": {\"messages\": [String], \"disclaimer\": String?} | null }")
+                appendLine("If you do not want to update a section, set it to null.")
+                appendLine("Latest user message: \"$lastUserMessage\". Address it in the reply first.")
+                appendLine("Conversation so far:")
+                if (history.isNotBlank()) {
+                    appendLine(history)
+                } else {
+                    appendLine("No previous messages provided.")
                 }
-                nutritionPlan?.let {
-                    appendLine("NutritionPlanJSON:")
-                    appendLine(json.encodeToString(AiNutritionResponse.serializer(), it))
-                }
-                sleepAdvice?.let {
-                    appendLine("SleepAdviceJSON:")
-                    appendLine(json.encodeToString(AiAdviceResponse.serializer(), it))
-                }
-                appendLine("Guidelines:")
-                appendLine("- Personalize training, nutrition, recovery, and pain management based on the latest message and conversation history.")
-                appendLine("- Track consistency, soreness, stress, and nutrition compliance. Highlight progress and recommend adjustments.")
-                appendLine("- For pain/injury, suggest form tweaks, deloads, mobility work, and remind them to consult a medical professional; never diagnose.")
-                appendLine("- For training updates, provide specific exercises, sets, reps, tempo/rest, and progression or deload suggestions.")
-                appendLine("- For nutrition, update calories/macros, meal swaps, hydration, and lifestyle habits.")
-                appendLine("- Avoid dumping the entire baseline plan repeatedly; only summarize changes or key focus areas.")
-                appendLine("- Always close with 1–3 concise next actions for the user.")
-                appendLine("Conversation so far:\n$history")
-                appendLine("Task: reply in natural language (no JSON wrapper). Keep tone supportive, expert, and actionable.")
             }
 
             val raw = llm.generateJson(prompt)
-            val reply = runCatching {
-                json.decodeFromString(AiChatResponse.serializer(), raw).reply
+            runCatching {
+                json.decodeFromString(AiChatResponse.serializer(), raw)
             }.getOrElse {
                 logger.warn("Failed to decode assistant response as JSON, using raw text. Raw={}", raw)
-                raw.trim().trim('"')
+                AiChatResponse(reply = raw.trim().trim('"'))
             }
-            AiChatResponse(reply = reply)
         }
     }.getOrElse {
         logger.warn("LLM chat fallback triggered", it)
         AiChatResponse(reply = "Coach is temporarily unavailable. Please try again later.")
     }
 
-    private suspend fun fetchTrainingPlan(req: AiChatRequest): AiTrainingResponse? =
-        withTimeoutOrNull(ContextTimeoutMs) {
-            runCatching { aiService.training(AiTrainingRequest(req.profile, weekIndex = 0)) }
-                .onFailure { logger.debug("Training plan unavailable: {}", it.message) }
+    suspend fun bootstrap(req: AiBootstrapRequest): AiBootstrapResponse = coroutineScope {
+        val trainingDeferred = async {
+            runCatching { aiService.training(AiTrainingRequest(req.profile, req.weekIndex)) }
+                .onFailure { logger.warn("Bootstrap training failed", it) }
                 .getOrNull()
         }
-
-    private suspend fun fetchNutritionPlan(req: AiChatRequest): AiNutritionResponse? =
-        withTimeoutOrNull(ContextTimeoutMs) {
-            runCatching { aiService.nutrition(AiNutritionRequest(req.profile, weekIndex = 0)) }
-                .onFailure { logger.debug("Nutrition plan unavailable: {}", it.message) }
+        val nutritionDeferred = async {
+            runCatching { aiService.nutrition(AiNutritionRequest(req.profile, req.weekIndex)) }
+                .onFailure { logger.warn("Bootstrap nutrition failed", it) }
                 .getOrNull()
         }
-
-    private suspend fun fetchSleepAdvice(req: AiChatRequest): AiAdviceResponse? =
-        withTimeoutOrNull(ContextTimeoutMs) {
+        val sleepDeferred = async {
             runCatching { aiService.sleep(AiAdviceRequest(req.profile)) }
-                .onFailure { logger.debug("Sleep advice unavailable: {}", it.message) }
+                .onFailure { logger.warn("Bootstrap sleep failed", it) }
                 .getOrNull()
         }
+        AiBootstrapResponse(
+            trainingPlan = trainingDeferred.await(),
+            nutritionPlan = nutritionDeferred.await(),
+            sleepAdvice = sleepDeferred.await()
+        )
+    }
 
     companion object {
-        private const val LlmTimeoutMs = 45_000L
-        private const val ContextTimeoutMs = 12_000L
+        private const val LlmTimeoutMs = 90_000L
         private const val DefaultLocale = "en-US"
         private val logger = LoggerFactory.getLogger(ChatService::class.java)
     }

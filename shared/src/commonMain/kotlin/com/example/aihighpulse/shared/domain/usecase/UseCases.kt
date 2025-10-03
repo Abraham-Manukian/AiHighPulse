@@ -32,6 +32,41 @@ class GenerateNutritionPlan(
     }
 }
 
+class BootstrapCoachData(
+    private val profileRepository: ProfileRepository,
+    private val aiTrainerRepository: AiTrainerRepository,
+    private val trainingRepository: TrainingRepository,
+    private val nutritionRepository: NutritionRepository,
+    private val adviceRepository: AdviceRepository
+) {
+    suspend operator fun invoke(weekIndex: Int = 0): Boolean {
+        val profile = profileRepository.getProfile() ?: return false
+        val bundle = aiTrainerRepository.bootstrap(profile, weekIndex) ?: return false
+        bundle.trainingPlan?.let { trainingRepository.savePlan(it) }
+        bundle.nutritionPlan?.let { nutritionRepository.savePlan(it) }
+        bundle.sleepAdvice?.let { adviceRepository.saveAdvice("sleep", it) }
+        return bundle.trainingPlan != null || bundle.nutritionPlan != null || bundle.sleepAdvice != null
+    }
+}
+
+
+class EnsureCoachData(
+    private val profileRepository: ProfileRepository,
+    private val trainingRepository: TrainingRepository,
+    private val nutritionRepository: NutritionRepository,
+    private val adviceRepository: AdviceRepository,
+    private val bootstrapCoachData: BootstrapCoachData,
+) {
+    suspend operator fun invoke(weekIndex: Int = 0, force: Boolean = false): Boolean {
+        if (profileRepository.getProfile() == null) return false
+        val needsTraining = force || !trainingRepository.hasPlan(weekIndex)
+        val needsNutrition = force || !nutritionRepository.hasPlan(weekIndex)
+        val needsAdvice = force || !adviceRepository.hasAdvice("sleep")
+        if (!needsTraining && !needsNutrition && !needsAdvice) return true
+        return bootstrapCoachData(weekIndex)
+    }
+}
+
 class SyncWithBackend(
     private val syncRepository: SyncRepository
 ) {

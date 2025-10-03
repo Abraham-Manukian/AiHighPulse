@@ -33,9 +33,11 @@ class ChatViewModel(private val ask: AskAiTrainer): ViewModel() {
             val localeTag = LocaleListCompat.getAdjustedDefault().get(0)?.toLanguageTag()
             val reply = runCatching { ask(history, text, localeTag) }
             _state.value = reply.fold(
-                onSuccess = { r -> _state.value.copy(messages = newHistory + ChatMessage("assistant", r), sending = false) },
+                onSuccess = { r -> _state.value.copy(messages = newHistory + ChatMessage("assistant", r.reply), sending = false) },
                 onFailure = { e -> _state.value.copy(sending = false, error = e.message) }
             )
         }
     }
 }
+
+

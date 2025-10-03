@@ -113,7 +113,7 @@ class AiService(private val llm: LLMClient) {
         )
 
     companion object {
-        private const val LlmTimeoutMs = 20_000L
+        private const val LlmTimeoutMs = 60_000L
         private val logger = LoggerFactory.getLogger(AiService::class.java)
     }
 }

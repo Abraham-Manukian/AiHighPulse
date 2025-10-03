@@ -16,7 +16,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -29,7 +28,7 @@ import com.example.aihighpulse.R
 @Composable
 fun HomeScreen(onNavigate: (String) -> Unit) {
     val vm: HomeViewModel = koinViewModel()
-    val s by vm.state.collectAsState()
+    val uiState = vm.state.collectAsState().value
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val columns = if (maxWidth < 700.dp) 1 else 2
@@ -40,7 +39,7 @@ fun HomeScreen(onNavigate: (String) -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
         ) {
-            item { OverviewCard(sets = s.todaySets, volume = s.totalVolume) }
+            item { OverviewCard(sets = uiState.todaySets, volume = uiState.totalVolume, sleepMinutes = uiState.sleepMinutes) }
             item { QuickActionCard(onNavigate) }
             item { TodayWorkoutCard(onNavigate) }
             item { NutritionSummaryCard(onNavigate) }
@@ -49,14 +48,14 @@ fun HomeScreen(onNavigate: (String) -> Unit) {
 }
 
 @Composable
-private fun OverviewCard(sets: Int, volume: Int) {
+private fun OverviewCard(sets: Int, volume: Int, sleepMinutes: Int) {
     Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation()) {
         androidx.compose.foundation.layout.Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.home_today), style = MaterialTheme.typography.titleMedium)
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                StatChip(stringResource(R.string.home_sets), sets.toString())
-                StatChip(stringResource(R.string.home_volume), "${volume} kg")
-                StatChip(stringResource(R.string.home_sleep_hours), "7h 20m")
+                StatChip(stringResource(R.string.home_sets), stringResource(R.string.home_sets_value, sets))
+                StatChip(stringResource(R.string.home_volume), stringResource(R.string.home_volume_value, volume))
+                StatChip(stringResource(R.string.home_sleep_hours), stringResource(R.string.home_sleep_value, sleepMinutes / 60, sleepMinutes % 60))
             }
         }
     }

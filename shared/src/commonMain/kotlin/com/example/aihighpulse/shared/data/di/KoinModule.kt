@@ -15,9 +15,11 @@ import com.example.aihighpulse.shared.data.repo.SettingsPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import java.util.Locale
 import com.russhwolf.settings.Settings
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -45,9 +47,11 @@ object DI {
         factory { GenerateTrainingPlan(get(), get()) }
         factory { LogWorkoutSet(get()) }
         factory { GenerateNutritionPlan(get(), get()) }
+        factory { BootstrapCoachData(get(), get(), get(), get(), get()) }
+        factory { EnsureCoachData(get(), get(), get(), get(), get()) }
         factory { SyncWithBackend(get()) }
         factory { ValidateSubscription(get()) }
-        factory { AskAiTrainer(get(), get(), get()) }
+        factory { AskAiTrainer(get(), get(), get(), get(), get(), get()) }
     }
 }
 // --- Simple placeholder implementations (MVP offline-first scaffolding) ---
@@ -79,10 +83,15 @@ class LocalTrainingRepository : TrainingRepository {
         val updated = workouts.value.map { if (it.id == workoutId) it.copy(sets = it.sets + set) else it }
         workouts.value = updated
     }
+    override suspend fun savePlan(plan: TrainingPlan) {
+        workouts.value = plan.workouts
+    }
     override fun observeWorkouts(): Flow<List<Workout>> = workouts.asStateFlow()
+    override suspend fun hasPlan(weekIndex: Int): Boolean = workouts.value.isNotEmpty()
 }
 
 class LocalNutritionRepository : NutritionRepository {
+    private val planFlow = MutableStateFlow<NutritionPlan?>(null)
     override suspend fun generatePlan(profile: Profile, weekIndex: Int): NutritionPlan {
         val kcalTarget = tdeeKcal(profile)
         val macros = macrosFor(profile, kcalTarget)
@@ -101,8 +110,15 @@ class LocalNutritionRepository : NutritionRepository {
             "Sun" to meals,
         )
         val shopping = listOf("oats", "milk", "banana", "chicken", "rice", "veg", "yogurt", "nuts")
-        return NutritionPlan(weekIndex, menu, shopping)
+        val plan = NutritionPlan(weekIndex, menu, shopping)
+        planFlow.value = plan
+        return plan
     }
+    override suspend fun savePlan(plan: NutritionPlan) {
+        planFlow.value = plan
+    }
+    override fun observePlan(): Flow<NutritionPlan?> = planFlow.asStateFlow()
+    override suspend fun hasPlan(weekIndex: Int): Boolean = planFlow.value?.weekIndex == weekIndex
 
     private fun tdeeKcal(p: Profile): Int {
         val s = if (p.sex == Sex.MALE) 5 else -161
@@ -128,10 +144,41 @@ class LocalNutritionRepository : NutritionRepository {
 }
 
 class StubAdviceRepository : AdviceRepository {
-    override suspend fun getAdvice(profile: Profile, context: Map<String, Any?>): Advice =
-        Advice(messages = listOf("Stay hydrated", "Warm up properly"))
-}
+    private val adviceMap = MutableStateFlow<Map<String, Advice>>(emptyMap())
 
+    override suspend fun getAdvice(profile: Profile, context: Map<String, Any?>): Advice {
+        val topic = (context["topic"] as? String)?.lowercase(Locale.ROOT) ?: "general"
+        val current = adviceMap.value[topic]
+        if (current != null) return current
+        val defaults = defaultAdvice(topic)
+        adviceMap.value = adviceMap.value + (topic to defaults)
+        return defaults
+    }
+
+    override suspend fun saveAdvice(topic: String, advice: Advice) {
+        val key = topic.lowercase(Locale.ROOT)
+        adviceMap.value = adviceMap.value + (key to advice)
+    }
+
+    override fun observeAdvice(topic: String): Flow<Advice> {
+        val key = topic.lowercase(Locale.ROOT)
+        return adviceMap.map { it[key] ?: defaultAdvice(key) }
+    }
+
+    override suspend fun hasAdvice(topic: String): Boolean =
+        adviceMap.value.containsKey(topic.lowercase(Locale.ROOT))
+
+    private fun defaultAdvice(topic: String): Advice = when (topic) {
+        "sleep" -> Advice(
+            messages = listOf(
+                "Sleep 7-9 hours when possible.",
+                "Keep a consistent bedtime routine.",
+                "Limit caffeine six hours before bed."
+            )
+        )
+        else -> Advice(messages = listOf("Stay hydrated", "Warm up properly"))
+    }
+}
 class StubPurchasesRepository : PurchasesRepository {
     override suspend fun isSubscriptionActive(): Boolean = false
 }
@@ -139,3 +186,11 @@ class StubPurchasesRepository : PurchasesRepository {
 class StubSyncRepository : SyncRepository {
     override suspend fun syncAll(): Boolean = true
 }
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="app_name">AiHighPulse</string>
 
     <!-- Navigation -->
@@ -12,18 +12,30 @@
     <string name="nav_chat">Chat</string>
 
     <!-- Home -->
+    <string name="home_sets_value">%1$d</string>
+    <string name="home_volume_value">%1$d kg</string>
+    <string name="home_sleep_value">%1$d h %2$d m</string>
     <string name="home_today">Today</string>
     <string name="home_sets">Sets</string>
     <string name="home_volume">Volume</string>
     <string name="home_sleep_hours">Sleep</string>
     <string name="home_quick_actions">Quick actions</string>
-    <string name="home_workout_today_title">Todays workout</string>
+    <string name="home_workout_today_title">Today workout</string>
     <string name="home_workout_today_sub">Full body - 45 min - 8 exercises</string>
     <string name="home_start">Start</string>
     <string name="home_preview">Preview</string>
     <string name="home_nutrition_title">Nutrition</string>
     <string name="home_open_menu">Open menu</string>
-    <string name="home_macros_sample">Protein 120g  Fat 60g  Carbs 250g</string>
+    <string name="home_macros_sample">Protein 120 g  Fat 60 g  Carbs 250 g</string>
+
+    <!-- Common day labels -->
+    <string name="day_mon_short">Mon</string>
+    <string name="day_tue_short">Tue</string>
+    <string name="day_wed_short">Wed</string>
+    <string name="day_thu_short">Thu</string>
+    <string name="day_fri_short">Fri</string>
+    <string name="day_sat_short">Sat</string>
+    <string name="day_sun_short">Sun</string>
 
     <!-- Onboarding -->
     <string name="onboard_title">Welcome to AiHighPulse</string>
@@ -40,10 +52,14 @@
     <string name="goal_maintain">Maintain</string>
     <string name="goal_gain_muscle">Bulk</string>
     <string name="label_experience">Experience: %1$d</string>
-    <string name="label_equipment">Equipment (comma separated)</string>
+    <string name="label_equipment_presets">Equipment you usually have</string>
+    <string name="label_equipment_manual">Add other equipment (comma, semicolon or newline)</string>
+    <string name="placeholder_equipment_manual">e.g. kettlebell, assault bike</string>
     <string name="label_dietary_prefs">Dietary preferences</string>
+    <string name="placeholder_dietary_prefs">e.g. high-protein, vegetarian</string>
     <string name="label_allergies">Allergies</string>
-    <string name="label_weekdays">Weekdays</string>
+    <string name="placeholder_allergies">e.g. peanuts, lactose</string>
+    <string name="label_weekdays">Training days</string>
     <string name="save_and_continue">Save and continue</string>
     <string name="error_invalid_input">Please check input values</string>
 
@@ -56,10 +72,22 @@
     <string name="workout_exercise_label">Exercise</string>
     <string name="workout_reps_label">Reps</string>
     <string name="workout_weight_label">Weight</string>
+    <string name="workout_rpe_label">RPE</string>
     <string name="workout_add_button">Add</string>
     <string name="workout_rest_timer_title">Rest timer</string>
     <string name="workout_rest_start">Start</string>
     <string name="workout_rest_stop">Stop</string>
+    <string name="workout_rest_remaining">%1$d s</string>
+    <string name="workout_completed_set">Done</string>
+    <string name="workout_feedback_title">Workout feedback</string>
+    <string name="workout_notes_label">Notes for coach</string>
+    <string name="workout_notes_hint">How did the session go?</string>
+    <string name="workout_mark_complete">Save feedback</string>
+    <string name="workout_weight_unit">kg</string>
+    <string name="workout_reps_unit">reps</string>
+    <string name="workout_weight_display">%1$.1f kg</string>
+    <string name="workout_weight_bodyweight">Bodyweight</string>
+    <string name="workout_set_summary">%1$d reps · %2$s · RPE %3$.1f</string>
 
     <!-- Nutrition -->
     <string name="action_refresh">Refresh</string>
@@ -74,10 +102,19 @@
     <string name="nutrition_detail_title">Meal details</string>
     <string name="nutrition_detail_missing">Meal not found</string>
     <string name="nutrition_ingredients">Ingredients</string>
+    <string name="nutrition_macro_protein">Protein</string>
+    <string name="nutrition_macro_fat">Fat</string>
+    <string name="nutrition_macro_carbs">Carbs</string>
+    <string name="nutrition_macro_kcal">Kcal</string>
+    <string name="nutrition_macro_item">%1$s: %2$s</string>
+    <string name="nutrition_macros_line">Kcal: %1$d  P:%2$d  F:%3$d  C:%4$d</string>
+    <string name="nutrition_shopping_bullet">• %1$s</string>
     <string name="action_back">Back</string>
 
     <!-- Sleep -->
     <string name="sleep_title">Sleep tips</string>
+    <string name="sleep_weekly_chart_title">Weekly sleep</string>
+    <string name="sleep_sync_health">Sync with Health</string>
 
     <!-- Progress -->
     <string name="progress_title">Statistics</string>
@@ -86,13 +123,6 @@
     <string name="progress_total_volume">Total volume: %1$d kg</string>
     <string name="progress_weekly_volume">Weekly volume</string>
     <string name="progress_empty_hint">No data yet. Start your first workout.</string>
-    <string name="dow_mon">Mon</string>
-    <string name="dow_tue">Tue</string>
-    <string name="dow_wed">Wed</string>
-    <string name="dow_thu">Thu</string>
-    <string name="dow_fri">Fri</string>
-    <string name="dow_sat">Sat</string>
-    <string name="dow_sun">Sun</string>
 
     <!-- Settings -->
     <string name="settings_no_profile_title">No profile yet</string>
@@ -102,7 +132,7 @@
     <string name="settings_height_weight">Height: %1$d cm  Weight: %2$.1f kg</string>
     <string name="settings_inc_weight">+0.5 kg</string>
     <string name="settings_dec_weight">-0.5 kg</string>
-    <string name="settings_saving">Saving...</string>
+    <string name="settings_saving">Saving…</string>
     <string name="settings_edit_profile">Edit profile</string>
     <string name="settings_units_title">Units</string>
     <string name="settings_units_metric">kg / cm</string>

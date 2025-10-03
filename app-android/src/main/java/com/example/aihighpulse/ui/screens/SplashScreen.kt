@@ -13,15 +13,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.koin.androidx.compose.get
 import com.example.aihighpulse.shared.domain.repository.ProfileRepository
+import com.example.aihighpulse.shared.domain.usecase.EnsureCoachData
 import com.example.aihighpulse.ui.navigation.Routes
 
 @Composable
 fun SplashScreen(onReady: (String) -> Unit) {
     val repo: ProfileRepository = get()
+    val ensureCoachData: EnsureCoachData = get()
+
     val decided = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        val dest = if (runCatching { repo.getProfile() }.getOrNull() != null) Routes.Home else Routes.Onboarding
-        onReady(dest)
+        val profile = runCatching { repo.getProfile() }.getOrNull()
+        val destination = if (profile != null) {
+            runCatching { ensureCoachData() }.onFailure { it.printStackTrace() }
+            Routes.Home
+        } else {
+            Routes.Onboarding
+        }
+        onReady(destination)
         decided.value = true
     }
     if (!decided.value) {
@@ -30,4 +39,5 @@ fun SplashScreen(onReady: (String) -> Unit) {
         }
     }
 }
+
 

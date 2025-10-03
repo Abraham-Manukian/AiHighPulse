@@ -21,10 +21,10 @@ object AppModule {
         single { AppDatabase(get()) }
 
         // ViewModels
-        viewModel { OnboardingViewModel(get()) }
+        viewModel { OnboardingViewModel(get(), get()) }
         viewModel { HomeViewModel(get(), get()) }
         viewModel { WorkoutViewModel(get(), get(), get()) }
-        viewModel { NutritionViewModel(get()) }
+        viewModel { NutritionViewModel(get(), get()) }
         viewModel { SleepViewModel(get(), get()) }
         viewModel { ProgressViewModel(get()) }
         viewModel { PaywallViewModel(get()) }
@@ -32,3 +32,5 @@ object AppModule {
         viewModel { com.example.aihighpulse.ui.vm.ChatViewModel(get()) }
     }
 }
+
+

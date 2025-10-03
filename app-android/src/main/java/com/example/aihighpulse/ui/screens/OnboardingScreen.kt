@@ -1,4 +1,4 @@
-package com.example.aihighpulse.ui.screens
+﻿package com.example.aihighpulse.ui.screens
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -6,14 +6,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -21,7 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,27 +32,44 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-// removed duplicate Color import
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import org.koin.androidx.compose.koinViewModel
+import com.example.aihighpulse.R
 import com.example.aihighpulse.shared.domain.model.Goal
 import com.example.aihighpulse.shared.domain.model.Sex
 import com.example.aihighpulse.ui.vm.OnboardingViewModel
-import com.example.aihighpulse.R
+import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun OnboardingScreen(onDone: () -> Unit) {
     val vm: OnboardingViewModel = koinViewModel()
     val s by vm.state.collectAsState()
+
+    val equipmentOptions = listOf(
+        "Гантели",
+        "Штанга",
+        "Турник",
+        "Скакалка",
+        "Эспандеры",
+        "Коврик",
+        "Петли TRX",
+        "Беговая дорожка",
+        "Велотренажёр"
+    )
+
+    val dayLabels = listOf(
+        "Mon" to stringResource(R.string.day_mon_short),
+        "Tue" to stringResource(R.string.day_tue_short),
+        "Wed" to stringResource(R.string.day_wed_short),
+        "Thu" to stringResource(R.string.day_thu_short),
+        "Fri" to stringResource(R.string.day_fri_short),
+        "Sat" to stringResource(R.string.day_sat_short),
+        "Sun" to stringResource(R.string.day_sun_short)
+    )
 
     Column(
         modifier = Modifier
@@ -70,101 +89,112 @@ fun OnboardingScreen(onDone: () -> Unit) {
         Text(stringResource(R.string.onboard_subtitle), color = Color.White.copy(alpha = 0.85f))
 
         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedTextField(
-                value = s.age,
-                onValueChange = { v -> vm.update { st -> st.copy(age = v.filter { it.isDigit() }.take(2)) } },
-                label = { Text(stringResource(R.string.label_age)) },
-                modifier = Modifier.weight(1f)
-            )
-            OutlinedTextField(
-                value = s.heightCm,
-                onValueChange = { v -> vm.update { st -> st.copy(heightCm = v.filter { it.isDigit() }.take(3)) } },
-                label = { Text(stringResource(R.string.label_height_cm)) },
-                modifier = Modifier.weight(1f)
-            )
-            OutlinedTextField(
-                value = s.weightKg,
-                onValueChange = { v -> vm.update { st -> st.copy(weightKg = v.filter { it.isDigit() || it == '.' }.take(5)) } },
-                label = { Text(stringResource(R.string.label_weight_kg)) },
-                modifier = Modifier.weight(1f)
-            )
-        }
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = s.age,
+                        onValueChange = { v -> vm.update { st -> st.copy(age = v.filter { it.isDigit() }.take(2)) } },
+                        label = { Text(stringResource(R.string.label_age)) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = s.heightCm,
+                        onValueChange = { v -> vm.update { st -> st.copy(heightCm = v.filter { it.isDigit() }.take(3)) } },
+                        label = { Text(stringResource(R.string.label_height_cm)) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = s.weightKg,
+                        onValueChange = { v -> vm.update { st -> st.copy(weightKg = v.filter { it.isDigit() || it == '.' }.take(5)) } },
+                        label = { Text(stringResource(R.string.label_weight_kg)) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
 
-        Text(stringResource(R.string.label_sex))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            val items = listOf(
-                Sex.MALE to stringResource(R.string.sex_male),
-                Sex.FEMALE to stringResource(R.string.sex_female),
-                Sex.OTHER to stringResource(R.string.sex_other)
-            )
-            items.forEach { (value, label) ->
-                FilterChip(selected = s.sex == value, onClick = { vm.update { it.copy(sex = value) } }, label = { Text(label) })
+                Text(stringResource(R.string.label_sex))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val items = listOf(
+                        Sex.MALE to stringResource(R.string.sex_male),
+                        Sex.FEMALE to stringResource(R.string.sex_female),
+                        Sex.OTHER to stringResource(R.string.sex_other)
+                    )
+                    items.forEach { (value, label) ->
+                        FilterChip(selected = s.sex == value, onClick = { vm.update { it.copy(sex = value) } }, label = { Text(label) })
+                    }
+                }
+
+                Text(stringResource(R.string.label_goal))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val items = listOf(
+                        Goal.LOSE_FAT to stringResource(R.string.goal_lose_fat),
+                        Goal.MAINTAIN to stringResource(R.string.goal_maintain),
+                        Goal.GAIN_MUSCLE to stringResource(R.string.goal_gain_muscle)
+                    )
+                    items.forEach { (value, label) ->
+                        FilterChip(selected = s.goal == value, onClick = { vm.update { it.copy(goal = value) } }, label = { Text(label) })
+                    }
+                }
+
+                Text(stringResource(R.string.label_experience, s.experienceLevel))
+                Slider(
+                    value = s.experienceLevel.toFloat(),
+                    onValueChange = { v -> vm.update { st -> st.copy(experienceLevel = v.toInt().coerceIn(1, 5)) } },
+                    valueRange = 1f..5f,
+                    steps = 3
+                )
+
+                Text(stringResource(R.string.label_equipment_presets))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    equipmentOptions.forEach { name ->
+                        val selected = name in s.selectedEquipment
+                        FilterChip(
+                            selected = selected,
+                            onClick = { vm.toggleEquipment(name) },
+                            label = { Text(name) }
+                        )
+                    }
+                }
+
+                OutlinedTextField(
+                    value = s.customEquipment,
+                    onValueChange = vm::setCustomEquipment,
+                    label = { Text(stringResource(R.string.label_equipment_manual)) },
+                    placeholder = { Text(stringResource(R.string.placeholder_equipment_manual)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = s.dietaryPreferences,
+                        onValueChange = { v -> vm.update { st -> st.copy(dietaryPreferences = v.take(120)) } },
+                        label = { Text(stringResource(R.string.label_dietary_prefs)) },
+                        placeholder = { Text(stringResource(R.string.placeholder_dietary_prefs)) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = s.allergies,
+                        onValueChange = { v -> vm.update { st -> st.copy(allergies = v.take(120)) } },
+                        label = { Text(stringResource(R.string.label_allergies)) },
+                        placeholder = { Text(stringResource(R.string.placeholder_allergies)) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Text(stringResource(R.string.label_weekdays))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    dayLabels.forEach { (key, label) ->
+                        val checked = s.days[key] == true
+                        Box(
+                            modifier = Modifier
+                                .clip(MaterialTheme.shapes.small)
+                                .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.small)
+                                .background(if (checked) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent)
+                                .clickable { vm.update { it.copy(days = it.days + (key to !checked)) } }
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                        ) { Text(label) }
+                    }
+                }
             }
-        }
-
-        Text(stringResource(R.string.label_goal))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            val items = listOf(
-                Goal.LOSE_FAT to stringResource(R.string.goal_lose_fat),
-                Goal.MAINTAIN to stringResource(R.string.goal_maintain),
-                Goal.GAIN_MUSCLE to stringResource(R.string.goal_gain_muscle)
-            )
-            items.forEach { (value, label) ->
-                FilterChip(selected = s.goal == value, onClick = { vm.update { it.copy(goal = value) } }, label = { Text(label) })
-            }
-        }
-
-        Text(stringResource(R.string.label_experience, s.experienceLevel))
-        Slider(
-            value = s.experienceLevel.toFloat(),
-            onValueChange = { v -> vm.update { st -> st.copy(experienceLevel = v.toInt().coerceIn(1, 5)) } },
-            valueRange = 1f..5f,
-            steps = 3
-        )
-
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            OutlinedTextField(
-                value = s.equipment,
-                onValueChange = { v -> vm.update { st -> st.copy(equipment = v.take(100)) } },
-                label = { Text(stringResource(R.string.label_equipment)) },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            OutlinedTextField(
-                value = s.dietaryPreferences,
-                onValueChange = { v -> vm.update { st -> st.copy(dietaryPreferences = v.take(100)) } },
-                label = { Text(stringResource(R.string.label_dietary_prefs)) },
-                modifier = Modifier.weight(1f)
-            )
-            OutlinedTextField(
-                value = s.allergies,
-                onValueChange = { v -> vm.update { st -> st.copy(allergies = v.take(100)) } },
-                label = { Text(stringResource(R.string.label_allergies)) },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Text(stringResource(R.string.label_weekdays))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            val days = listOf("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
-            days.forEach { d ->
-                val checked = s.days[d] == true
-                Box(
-                    modifier = Modifier
-                        .clip(MaterialTheme.shapes.small)
-                        .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.small)
-                        .background(if (checked) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent)
-                        .clickable { vm.update { it.copy(days = it.days + (d to !checked)) } }
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                ) { Text(d) }
-            }
-        }
-
-        }
         }
 
         if (s.error != null) Text(stringResource(R.string.error_invalid_input), color = MaterialTheme.colorScheme.error)

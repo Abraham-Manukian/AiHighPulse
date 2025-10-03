@@ -67,6 +67,13 @@ class TrainingRepositoryDb(
         db.workoutQueries.insertSet(workoutId, set.exerciseId, set.reps.toLong(), set.weightKg, set.rpe)
     }
 
+    override suspend fun savePlan(plan: TrainingPlan) {
+        persistPlan(plan)
+    }
+
+    override suspend fun hasPlan(weekIndex: Int): Boolean =
+        db.workoutQueries.selectWorkoutsWithSetsByWeek(weekIndex.toLong()).executeAsList().isNotEmpty()
+
     override fun observeWorkouts(): Flow<List<Workout>> =
         db.workoutQueries.selectWorkoutsWithSets()
             .asFlow()

@@ -1,4 +1,4 @@
-package com.example.aihighpulse.ui.vm
+﻿package com.example.aihighpulse.ui.vm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,10 +8,13 @@ import com.example.aihighpulse.shared.domain.model.Goal
 import com.example.aihighpulse.shared.domain.model.Profile
 import com.example.aihighpulse.shared.domain.model.Sex
 import com.example.aihighpulse.shared.domain.repository.ProfileRepository
+import com.example.aihighpulse.shared.domain.usecase.BootstrapCoachData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
+private val DEFAULT_EQUIPMENT = setOf("���⥫�", "��୨�")
 
 data class OnboardingState(
     val age: String = "28",
@@ -22,7 +25,8 @@ data class OnboardingState(
     val experienceLevel: Int = 3,
     val dietaryPreferences: String = "",
     val allergies: String = "",
-    val equipment: String = "dumbbells, pull-up bar",
+    val selectedEquipment: Set<String> = DEFAULT_EQUIPMENT,
+    val customEquipment: String = "",
     val days: Map<String, Boolean> = mapOf(
         "Mon" to true, "Tue" to true, "Wed" to false, "Thu" to true, "Fri" to false, "Sat" to false, "Sun" to false
     ),
@@ -31,12 +35,24 @@ data class OnboardingState(
 )
 
 class OnboardingViewModel(
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val bootstrapCoachData: BootstrapCoachData,
 ) : ViewModel() {
     private val _state = MutableStateFlow(OnboardingState())
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
 
     fun update(block: (OnboardingState) -> OnboardingState) { _state.value = block(_state.value) }
+
+    fun toggleEquipment(option: String) {
+        update { st ->
+            val newSet = if (st.selectedEquipment.contains(option)) st.selectedEquipment - option else st.selectedEquipment + option
+            st.copy(selectedEquipment = newSet)
+        }
+    }
+
+    fun setCustomEquipment(value: String) {
+        update { it.copy(customEquipment = value.take(200)) }
+    }
 
     fun save(onSuccess: () -> Unit) {
         val s = _state.value
@@ -49,6 +65,8 @@ class OnboardingViewModel(
         }
         viewModelScope.launch {
             _state.value = s.copy(saving = true, error = null)
+            val manualEquipment = s.customEquipment.split(',', ';', '\n').map { it.trim() }.filter { it.isNotEmpty() }
+            val allEquipment = (s.selectedEquipment + manualEquipment).map { it.trim() }.filter { it.isNotEmpty() }
             val profile = Profile(
                 id = "local",
                 age = age,
@@ -58,16 +76,16 @@ class OnboardingViewModel(
                 goal = s.goal,
                 experienceLevel = s.experienceLevel,
                 constraints = Constraints(),
-                equipment = Equipment(items = s.equipment.split(',').map { it.trim() }.filter { it.isNotEmpty() }),
-                dietaryPreferences = s.dietaryPreferences.split(',').map { it.trim() }.filter { it.isNotEmpty() },
-                allergies = s.allergies.split(',').map { it.trim() }.filter { it.isNotEmpty() },
+                equipment = Equipment(items = allEquipment),
+                dietaryPreferences = s.dietaryPreferences.split(',',';','\n').map { it.trim() }.filter { it.isNotEmpty() },
+                allergies = s.allergies.split(',',';','\n').map { it.trim() }.filter { it.isNotEmpty() },
                 weeklySchedule = s.days,
                 budgetLevel = 2
             )
             profileRepository.upsertProfile(profile)
+            runCatching { bootstrapCoachData() }.onFailure { it.printStackTrace() }
             _state.value = s.copy(saving = false)
             onSuccess()
         }
     }
 }
-

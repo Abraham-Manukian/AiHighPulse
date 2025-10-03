@@ -1,9 +1,13 @@
 ﻿package com.example.aihighpulse.shared.data.repo
 
 import com.example.aihighpulse.shared.data.network.ApiClient
+import com.example.aihighpulse.shared.data.network.dto.AdviceDto
+import com.example.aihighpulse.shared.data.network.dto.NutritionPlanDto
+import com.example.aihighpulse.shared.data.network.dto.TrainingPlanDto
 import com.example.aihighpulse.shared.domain.model.Profile
 import com.example.aihighpulse.shared.domain.repository.ChatMessage
 import com.example.aihighpulse.shared.domain.repository.ChatRepository
+import com.example.aihighpulse.shared.domain.repository.CoachResponse
 import kotlinx.serialization.Serializable
 
 class NetworkChatRepository(private val api: ApiClient): ChatRepository {
@@ -12,14 +16,19 @@ class NetworkChatRepository(private val api: ApiClient): ChatRepository {
         history: List<ChatMessage>,
         userMessage: String,
         locale: String?
-    ): String {
+    ): CoachResponse {
         val req = ChatRequest(
             profile = ChatProfileDto.from(profile),
             messages = history.map { ChatMsgDto(it.role, it.content) } + ChatMsgDto("user", userMessage),
             locale = locale
         )
         val res: ChatResponse = api.post("/ai/chat", req)
-        return res.reply
+        return CoachResponse(
+            reply = res.reply,
+            trainingPlan = res.trainingPlan?.toDomain(),
+            nutritionPlan = res.nutritionPlan?.toDomain(),
+            sleepAdvice = res.sleepAdvice?.toDomain()
+        )
     }
 }
 
@@ -62,4 +71,9 @@ data class ChatRequest(
 )
 
 @Serializable
-data class ChatResponse(val reply: String)
+data class ChatResponse(
+    val reply: String,
+    val trainingPlan: TrainingPlanDto? = null,
+    val nutritionPlan: NutritionPlanDto? = null,
+    val sleepAdvice: AdviceDto? = null
+)

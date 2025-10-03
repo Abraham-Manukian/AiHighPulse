@@ -36,6 +36,7 @@ fun main() {
             post("/ai/nutrition") { call.respond(service.nutrition(call.receive())) }
             post("/ai/sleep") { call.respond(service.sleep(call.receive())) }
             post("/ai/chat") { call.respond(chatService.chat(call.receive())) }
+            post("/ai/bootstrap") { call.respond(chatService.bootstrap(call.receive())) }
             get("/health") { call.respondText("OK") }
         }
     }.start(wait = true)
@@ -128,4 +129,21 @@ data class AiChatMessage(val role: String, val content: String)
 data class AiChatRequest(val profile: AiProfile, val messages: List<AiChatMessage>, val locale: String? = null)
 
 @Serializable
-data class AiChatResponse(val reply: String)
+data class AiChatResponse(val reply: String, val trainingPlan: AiTrainingResponse? = null, val nutritionPlan: AiNutritionResponse? = null, val sleepAdvice: AiAdviceResponse? = null)
+
+@Serializable
+data class AiBootstrapRequest(
+    val profile: AiProfile,
+    val weekIndex: Int = 0,
+    val locale: String? = null
+)
+
+@Serializable
+data class AiBootstrapResponse(
+    val trainingPlan: AiTrainingResponse? = null,
+    val nutritionPlan: AiNutritionResponse? = null,
+    val sleepAdvice: AiAdviceResponse? = null
+)
+
+
+

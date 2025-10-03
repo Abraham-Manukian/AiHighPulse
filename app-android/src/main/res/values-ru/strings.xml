@@ -1,9 +1,9 @@
-<resources>
+﻿<resources>
     <string name="app_name">AiHighPulse</string>
 
     <!-- Navigation -->
     <string name="nav_home">Главная</string>
-    <string name="nav_workout">Тренировка</string>
+    <string name="nav_workout">Тренировки</string>
     <string name="nav_nutrition">Питание</string>
     <string name="nav_sleep">Сон</string>
     <string name="nav_progress">Прогресс</string>
@@ -12,22 +12,34 @@
     <string name="nav_chat">Чат</string>
 
     <!-- Home -->
+    <string name="home_sets_value">%1$d</string>
+    <string name="home_volume_value">%1$d кг</string>
+    <string name="home_sleep_value">%1$d ч %2$d мин</string>
     <string name="home_today">Сегодня</string>
-    <string name="home_sets">Сеты</string>
+    <string name="home_sets">Подходы</string>
     <string name="home_volume">Объём</string>
     <string name="home_sleep_hours">Сон</string>
     <string name="home_quick_actions">Быстрые действия</string>
     <string name="home_workout_today_title">Тренировка на сегодня</string>
-    <string name="home_workout_today_sub">Фуллбоди — 45 мин — 8 упражнений</string>
-    <string name="home_start">Начать</string>
-    <string name="home_preview">Предпросмотр</string>
+    <string name="home_workout_today_sub">Фуллбоди – 45 мин – 8 упражнений</string>
+    <string name="home_start">Старт</string>
+    <string name="home_preview">Просмотр</string>
     <string name="home_nutrition_title">Питание</string>
     <string name="home_open_menu">Открыть меню</string>
     <string name="home_macros_sample">Белки 120 г  Жиры 60 г  Углеводы 250 г</string>
 
+    <!-- Common day labels -->
+    <string name="day_mon_short">Пн</string>
+    <string name="day_tue_short">Вт</string>
+    <string name="day_wed_short">Ср</string>
+    <string name="day_thu_short">Чт</string>
+    <string name="day_fri_short">Пт</string>
+    <string name="day_sat_short">Сб</string>
+    <string name="day_sun_short">Вс</string>
+
     <!-- Onboarding -->
     <string name="onboard_title">Добро пожаловать в AiHighPulse</string>
-    <string name="onboard_subtitle">Умные тренировки, питание и сон под ваши цели.</string>
+    <string name="onboard_subtitle">Умные тренировки, питание и сон — всё под вашу цель.</string>
     <string name="label_age">Возраст</string>
     <string name="label_height_cm">Рост, см</string>
     <string name="label_weight_kg">Вес, кг</string>
@@ -40,15 +52,19 @@
     <string name="goal_maintain">Поддержание</string>
     <string name="goal_gain_muscle">Набор</string>
     <string name="label_experience">Опыт: %1$d</string>
-    <string name="label_equipment">Инвентарь (через запятую)</string>
+    <string name="label_equipment_presets">Какой инвентарь есть под рукой</string>
+    <string name="label_equipment_manual">Добавьте свой инвентарь (через запятую, точку с запятой или с новой строки)</string>
+    <string name="placeholder_equipment_manual">например, гиря, велотренажёр</string>
     <string name="label_dietary_prefs">Пищевые предпочтения</string>
+    <string name="placeholder_dietary_prefs">например, высокобелковое, вегетарианец</string>
     <string name="label_allergies">Аллергии</string>
-    <string name="label_weekdays">Дни недели</string>
+    <string name="placeholder_allergies">например, арахис, лактоза</string>
+    <string name="label_weekdays">Дни тренировок</string>
     <string name="save_and_continue">Сохранить и продолжить</string>
-    <string name="error_invalid_input">Проверьте корректность введённых значений</string>
+    <string name="error_invalid_input">Проверьте введённые данные</string>
 
     <!-- Generic -->
-    <string name="loading">Загрузка</string>
+    <string name="loading">Загрузка…</string>
     <string name="error_generic">Что-то пошло не так</string>
 
     <!-- Workout -->
@@ -56,60 +72,74 @@
     <string name="workout_exercise_label">Упражнение</string>
     <string name="workout_reps_label">Повторения</string>
     <string name="workout_weight_label">Вес</string>
+    <string name="workout_rpe_label">RPE</string>
     <string name="workout_add_button">Добавить</string>
     <string name="workout_rest_timer_title">Таймер отдыха</string>
     <string name="workout_rest_start">Старт</string>
     <string name="workout_rest_stop">Стоп</string>
+    <string name="workout_rest_remaining">%1$d с</string>
+    <string name="workout_completed_set">Выполнено</string>
+    <string name="workout_feedback_title">Обратная связь тренеру</string>
+    <string name="workout_notes_label">Комментарий</string>
+    <string name="workout_notes_hint">Как прошла тренировка?</string>
+    <string name="workout_mark_complete">Сохранить</string>
+    <string name="workout_weight_unit">кг</string>
+    <string name="workout_reps_unit">повт.</string>
+    <string name="workout_weight_display">%1$.1f кг</string>
+    <string name="workout_weight_bodyweight">Собственный вес</string>
+    <string name="workout_set_summary">%1$d повт. · %2$s · RPE %3$.1f</string>
 
     <!-- Nutrition -->
     <string name="action_refresh">Обновить</string>
-    <string name="nutrition_loading_title">Загрузка меню</string>
+    <string name="nutrition_loading_title">Загружаем меню</string>
     <string name="nutrition_error_title">Не удалось загрузить</string>
-    <string name="nutrition_error_hint">Повторите позже</string>
+    <string name="nutrition_error_hint">Попробуйте позже</string>
     <string name="nutrition_macros_chart_title">Распределение макросов</string>
     <string name="nutrition_tab_menu">Меню</string>
     <string name="nutrition_tab_shopping">Список покупок</string>
-    <string name="nutrition_day_totals">Итого за день</string>
-    <string name="nutrition_week_totals">Итого за неделю</string>
-    <string name="nutrition_detail_title">Детали блюда</string>
+    <string name="nutrition_day_totals">Итоги за день</string>
+    <string name="nutrition_week_totals">Итоги за неделю</string>
+    <string name="nutrition_detail_title">Состав блюда</string>
     <string name="nutrition_detail_missing">Блюдо не найдено</string>
     <string name="nutrition_ingredients">Ингредиенты</string>
+    <string name="nutrition_macro_protein">Белки</string>
+    <string name="nutrition_macro_fat">Жиры</string>
+    <string name="nutrition_macro_carbs">Углеводы</string>
+    <string name="nutrition_macro_kcal">Ккал</string>
+    <string name="nutrition_macro_item">%1$s: %2$s</string>
+    <string name="nutrition_macros_line">Ккал: %1$d  Б:%2$d  Ж:%3$d  У:%4$d</string>
+    <string name="nutrition_shopping_bullet">• %1$s</string>
     <string name="action_back">Назад</string>
 
     <!-- Sleep -->
     <string name="sleep_title">Советы по сну</string>
+    <string name="sleep_weekly_chart_title">Сон за неделю</string>
+    <string name="sleep_sync_health">Синхронизировать с Health</string>
 
     <!-- Progress -->
     <string name="progress_title">Статистика</string>
-    <string name="progress_total_workouts">Всего тренировок: %1$d</string>
-    <string name="progress_total_sets">Всего подходов: %1$d</string>
+    <string name="progress_total_workouts">Тренировок всего: %1$d</string>
+    <string name="progress_total_sets">Подходов всего: %1$d</string>
     <string name="progress_total_volume">Общий объём: %1$d кг</string>
-    <string name="progress_weekly_volume">Недельный объём</string>
-    <string name="progress_empty_hint">Пока нет данных. Начните первую тренировку.</string>
-    <string name="dow_mon">Пн</string>
-    <string name="dow_tue">Вт</string>
-    <string name="dow_wed">Ср</string>
-    <string name="dow_thu">Чт</string>
-    <string name="dow_fri">Пт</string>
-    <string name="dow_sat">Сб</string>
-    <string name="dow_sun">Вс</string>
+    <string name="progress_weekly_volume">Объём за неделю</string>
+    <string name="progress_empty_hint">Данных пока нет — начните с первой тренировки.</string>
 
     <!-- Settings -->
-    <string name="settings_no_profile_title">Профиль не создан</string>
-    <string name="settings_no_profile_sub">Пройдите онбординг, чтобы создать профиль</string>
+    <string name="settings_no_profile_title">Профиль ещё не создан</string>
+    <string name="settings_no_profile_sub">Пройдите онбординг, чтобы заполнить профиль.</string>
     <string name="settings_title">Профиль</string>
     <string name="settings_age">Возраст: %1$d</string>
     <string name="settings_height_weight">Рост: %1$d см  Вес: %2$.1f кг</string>
     <string name="settings_inc_weight">+0,5 кг</string>
     <string name="settings_dec_weight">-0,5 кг</string>
-    <string name="settings_saving">Сохранение...</string>
+    <string name="settings_saving">Сохраняем…</string>
     <string name="settings_edit_profile">Редактировать профиль</string>
-    <string name="settings_units_title">Единицы</string>
+    <string name="settings_units_title">Единицы измерения</string>
     <string name="settings_units_metric">кг / см</string>
-    <string name="settings_units_imperial">фнт / дюйм</string>
+    <string name="settings_units_imperial">фунты / дюймы</string>
     <string name="settings_language_title">Язык</string>
     <string name="settings_language_ru">Русский</string>
-    <string name="settings_language_system">Системный</string>
+    <string name="settings_language_system">Как в системе</string>
     <string name="settings_theme_title">Тема</string>
     <string name="settings_theme_light">Светлая</string>
     <string name="settings_theme_dark">Тёмная</string>
@@ -117,14 +147,14 @@
 
     <!-- Paywall -->
     <string name="paywall_title">Подписка Pro</string>
-    <string name="paywall_desc">Откройте расширенные функции. Интеграция Billing в разработке.</string>
+    <string name="paywall_desc">Откройте дополнительные функции. Интеграция оплаты в разработке.</string>
     <string name="paywall_active">Подписка активна</string>
-    <string name="paywall_cta">Купить (заглушка)</string>
-    <string name="paywall_monthly">Помес.</string>
-    <string name="paywall_yearly">Годовая</string>
+    <string name="paywall_cta">Оформить (заглушка)</string>
+    <string name="paywall_monthly">Месяц</string>
+    <string name="paywall_yearly">Год</string>
 
     <!-- Chat -->
-    <string name="chat_title">AI Тренер</string>
-    <string name="chat_hint">Спросите тренера…</string>
+    <string name="chat_title">AI-тренер</string>
+    <string name="chat_hint">Задайте вопрос тренеру…</string>
     <string name="chat_send">Отправить</string>
 </resources>
