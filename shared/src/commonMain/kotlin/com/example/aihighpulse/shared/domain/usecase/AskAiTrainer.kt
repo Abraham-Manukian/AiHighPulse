@@ -9,6 +9,8 @@ import com.example.aihighpulse.shared.domain.repository.NutritionRepository
 import com.example.aihighpulse.shared.domain.repository.PreferencesRepository
 import com.example.aihighpulse.shared.domain.repository.ProfileRepository
 import com.example.aihighpulse.shared.domain.repository.TrainingRepository
+import com.example.aihighpulse.shared.domain.util.DataResult
+import io.github.aakira.napier.Napier
 
 class AskAiTrainer(
     private val profileRepository: ProfileRepository,
@@ -22,14 +24,25 @@ class AskAiTrainer(
         history: List<ChatMessage>,
         userMessage: String,
         localeOverride: String? = null
-    ): CoachResponse {
+    ): DataResult<CoachResponse> {
         val profile = profileRepository.getProfile() ?: error("Profile required")
         val locale = localeOverride ?: preferencesRepository.getLanguageTag()
-        val response = chatRepository.send(profile, history, userMessage, locale)
-        response.trainingPlan?.let { plan -> trainingRepository.savePlan(plan) }
-        response.nutritionPlan?.let { plan -> nutritionRepository.savePlan(plan) }
-        response.sleepAdvice?.let { advice -> adviceRepository.saveAdvice("sleep", advice) }
-        return response
+        val result = chatRepository.send(profile, history, userMessage, locale)
+        return when (result) {
+            is DataResult.Success -> {
+                result.data.trainingPlan?.let { trainingRepository.savePlan(it) }
+                result.data.nutritionPlan?.let { nutritionRepository.savePlan(it) }
+                result.data.sleepAdvice?.let { adviceRepository.saveAdvice("sleep", it) }
+                result
+            }
+            is DataResult.Failure -> {
+                Napier.w(
+                    message = "Chat send failed: ${result.reason} ${result.message.orEmpty()}",
+                    throwable = result.throwable
+                )
+                result
+            }
+        }
     }
 }
 

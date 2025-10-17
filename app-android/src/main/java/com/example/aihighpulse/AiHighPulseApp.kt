@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import java.util.Locale
 import com.example.aihighpulse.di.AppModule
 import com.example.aihighpulse.shared.data.di.DI
 import com.example.aihighpulse.shared.domain.repository.PreferencesRepository

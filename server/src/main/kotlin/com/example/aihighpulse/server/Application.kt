@@ -1,9 +1,10 @@
-package com.example.aihighpulse.server
+﻿package com.example.aihighpulse.server
 
 import com.example.aihighpulse.server.config.Env
 import com.example.aihighpulse.server.llm.LLMClient
 import com.example.aihighpulse.server.llm.OpenRouterLLMClient
 import com.example.aihighpulse.server.llm.RetryingLLMClient
+import com.example.aihighpulse.server.llm.ThrottledLLMClient
 import com.example.aihighpulse.server.llm.StubLLMClient
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -29,7 +30,6 @@ fun main() {
         install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true; encodeDefaults = true }) }
         val llm = createLLMClient()
         val service = AiService(llm)
-        warmUpLLM(llm)
         val chatService = ChatService(llm, service)
         routing {
             post("/ai/training") { call.respond(service.training(call.receive())) }
@@ -59,23 +59,17 @@ private fun createLLMClient(): LLMClient {
             siteUrl = siteUrl,
             appName = appName
         )
-        return RetryingLLMClient(openRouter, attempts = 3, delayMs = 1500)
+        val throttled = ThrottledLLMClient(openRouter, minSpacingMs = 2_500)
+        return RetryingLLMClient(
+            delegate = throttled,
+            attempts = 1,
+            initialDelayMs = 2_500,
+            maxDelayMs = 15_000,
+            backoffMultiplier = 1.8
+        )
     }
     startupLogger.warn("OPENROUTER_API_KEY not provided; falling back to stubbed responses")
     return StubLLMClient("{\"reply\":\"Coach is offline right now. Please configure OPENROUTER_API_KEY.\"}")
-}
-
-private fun warmUpLLM(llm: LLMClient) {
-    runBlocking {
-        val result = withTimeoutOrNull(20_000L) {
-            runCatching { llm.generateJson("Warm-up ping") }
-                .onSuccess { startupLogger.info("LLM warm-up completed") }
-                .onFailure { startupLogger.warn("LLM warm-up failed", it) }
-        }
-        if (result == null) {
-            startupLogger.warn("LLM warm-up timed out")
-        }
-    }
 }
 
 @Serializable
@@ -90,10 +84,13 @@ data class AiProfile(
     val dietaryPreferences: List<String> = emptyList(),
     val allergies: List<String> = emptyList(),
     val weeklySchedule: Map<String, Boolean> = emptyMap(),
+    val injuries: List<String> = emptyList(),
+    val healthNotes: List<String> = emptyList(),
+    val budgetLevel: Int = 2,
 )
 
 @Serializable
-data class AiTrainingRequest(val profile: AiProfile, val weekIndex: Int)
+data class AiTrainingRequest(val profile: AiProfile, val weekIndex: Int, val locale: String? = null)
 
 @Serializable
 data class AiSet(val exerciseId: String, val reps: Int, val weightKg: Double? = null, val rpe: Double? = null)
@@ -105,19 +102,33 @@ data class AiWorkout(val id: String, val date: String, val sets: List<AiSet>)
 data class AiTrainingResponse(val weekIndex: Int, val workouts: List<AiWorkout>)
 
 @Serializable
-data class Macros(val proteinGrams: Int, val fatGrams: Int, val carbsGrams: Int, val kcal: Int)
+data class Macros(
+    val proteinGrams: Int = 0,
+    val fatGrams: Int = 0,
+    val carbsGrams: Int = 0,
+    val kcal: Int = 0
+)
 
 @Serializable
-data class AiMeal(val name: String, val ingredients: List<String>, val kcal: Int, val macros: Macros)
+data class AiMeal(
+    val name: String,
+    val ingredients: List<String>,
+    val kcal: Int = 0,
+    val macros: Macros = Macros()
+)
 
 @Serializable
-data class AiNutritionRequest(val profile: AiProfile, val weekIndex: Int)
+data class AiNutritionRequest(val profile: AiProfile, val weekIndex: Int, val locale: String? = null)
 
 @Serializable
-data class AiNutritionResponse(val weekIndex: Int, val mealsByDay: Map<String, List<AiMeal>>)
+data class AiNutritionResponse(
+    val weekIndex: Int,
+    val mealsByDay: Map<String, List<AiMeal>>,
+    val shoppingList: List<String> = emptyList()
+)
 
 @Serializable
-data class AiAdviceRequest(val profile: AiProfile)
+data class AiAdviceRequest(val profile: AiProfile, val locale: String? = null)
 
 @Serializable
 data class AiAdviceResponse(val messages: List<String>, val disclaimer: String? = "Not medical advice")
@@ -144,6 +155,10 @@ data class AiBootstrapResponse(
     val nutritionPlan: AiNutritionResponse? = null,
     val sleepAdvice: AiAdviceResponse? = null
 )
+
+
+
+
 
 
 

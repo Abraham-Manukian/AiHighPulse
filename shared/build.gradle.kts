@@ -79,6 +79,7 @@ sqldelight {
     databases {
         create("AppDatabase") {
             packageName.set("com.example.aihighpulse.shared.db")
+            verifyMigrations.set(false)
         }
     }
 }

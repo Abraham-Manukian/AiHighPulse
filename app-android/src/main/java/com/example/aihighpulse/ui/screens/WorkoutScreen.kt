@@ -139,7 +139,7 @@ fun WorkoutScreen() {
                     }
                 }
             }
-            RestTimer()
+                //RestTimer()  todo потом добавить но чтоб не пол экрана занимало
         }
         if (showAddSheet.value) {
             ModalBottomSheet(onDismissRequest = { showAddSheet.value = false }) {

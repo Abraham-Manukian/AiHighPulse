@@ -1,4 +1,4 @@
-﻿package com.example.aihighpulse.server.llm.dto
+package com.example.aihighpulse.server.llm.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -9,9 +9,10 @@ import kotlinx.serialization.json.JsonPrimitive
 data class ChatCompletionRequestDto(
     val model: String,
     val messages: List<ChatMessageDto>,
-    val temperature: Double,
-    val stream: Boolean,
-    @SerialName("max_tokens") val maxTokens: Int
+    val temperature: Double? = null,
+    @SerialName("top_p") val topP: Double? = null,
+    @SerialName("max_tokens") val maxTokens: Int? = null,
+    @SerialName("response_format") val responseFormat: ResponseFormatDto? = null
 )
 
 @Serializable
@@ -40,3 +41,8 @@ data class ChatErrorDto(
     val codeAsString: String?
         get() = (code as? JsonPrimitive)?.content
 }
+
+@Serializable
+data class ResponseFormatDto(
+    val type: String
+)

@@ -2,7 +2,9 @@ package com.example.aihighpulse.shared.domain.usecase
 
 import com.example.aihighpulse.shared.domain.model.*
 import com.example.aihighpulse.shared.domain.repository.*
+import com.example.aihighpulse.shared.domain.util.DataResult
 import kotlinx.coroutines.flow.Flow
+import io.github.aakira.napier.Napier
 
 class GenerateTrainingPlan(
     private val profileRepository: ProfileRepository,
@@ -41,13 +43,31 @@ class BootstrapCoachData(
 ) {
     suspend operator fun invoke(weekIndex: Int = 0): Boolean {
         val profile = profileRepository.getProfile() ?: return false
-        val bundle = aiTrainerRepository.bootstrap(profile, weekIndex) ?: return false
-        bundle.trainingPlan?.let { trainingRepository.savePlan(it) }
-        bundle.nutritionPlan?.let { nutritionRepository.savePlan(it) }
-        bundle.sleepAdvice?.let { adviceRepository.saveAdvice("sleep", it) }
-        return bundle.trainingPlan != null || bundle.nutritionPlan != null || bundle.sleepAdvice != null
+        val bundleResult = aiTrainerRepository.bootstrap(profile, weekIndex)
+        val bundle = when (bundleResult) {
+            is DataResult.Success -> bundleResult.data
+            is DataResult.Failure -> {
+                Napier.w(
+                    message = "Bootstrap bundle failed: ${bundleResult.reason} ${bundleResult.message.orEmpty()}",
+                    throwable = bundleResult.throwable
+                )
+                null
+            }
+        }
+
+        val trainingPlan = bundle?.trainingPlan ?: trainingRepository.generatePlan(profile, weekIndex)
+        trainingRepository.savePlan(trainingPlan)
+
+        val nutritionPlan = bundle?.nutritionPlan ?: nutritionRepository.generatePlan(profile, weekIndex)
+        nutritionRepository.savePlan(nutritionPlan)
+
+        val advice = bundle?.sleepAdvice ?: adviceRepository.getAdvice(profile, mapOf("topic" to "sleep"))
+        adviceRepository.saveAdvice("sleep", advice)
+
+        return true
     }
 }
+
 
 
 class EnsureCoachData(

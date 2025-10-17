@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.aihighpulse.R
 import com.example.aihighpulse.shared.domain.repository.ChatMessage
+import com.example.aihighpulse.ui.vm.ChatSendState
 import com.example.aihighpulse.ui.vm.ChatViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -38,9 +39,26 @@ fun ChatScreen() {
                 placeholder = { Text(stringResource(R.string.chat_hint)) }
             )
             Spacer(Modifier.width(8.dp))
-            Button(enabled = !s.sending, onClick = { vm.send() }) { Text(stringResource(R.string.chat_send)) }
+            val isLoading = s.sendState is ChatSendState.Loading
+            Button(enabled = !isLoading, onClick = { vm.send() }) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(stringResource(R.string.chat_send))
+            }
         }
-        if (s.error != null) Text(s.error!!, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(8.dp))
+        val errorMessage = (s.sendState as? ChatSendState.Error)?.message
+        if (errorMessage != null) {
+            Text(
+                errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
     }
 }
 
@@ -61,4 +79,3 @@ private fun MessageBubble(msg: ChatMessage) {
         }
     }
 }
-

@@ -1,6 +1,7 @@
 package com.example.aihighpulse.shared.domain.repository
 
 import com.example.aihighpulse.shared.domain.model.*
+import com.example.aihighpulse.shared.domain.util.DataResult
 import kotlinx.coroutines.flow.Flow
 
 interface ProfileRepository {
@@ -48,10 +49,10 @@ interface PreferencesRepository {
 }
 
 interface AiTrainerRepository {
-    suspend fun generateTrainingPlan(profile: Profile, weekIndex: Int): TrainingPlan?
-    suspend fun generateNutritionPlan(profile: Profile, weekIndex: Int): NutritionPlan?
-    suspend fun getSleepAdvice(profile: Profile): Advice?
-    suspend fun bootstrap(profile: Profile, weekIndex: Int): CoachBundle?
+    suspend fun generateTrainingPlan(profile: Profile, weekIndex: Int): DataResult<TrainingPlan>
+    suspend fun generateNutritionPlan(profile: Profile, weekIndex: Int): DataResult<NutritionPlan>
+    suspend fun getSleepAdvice(profile: Profile): DataResult<Advice>
+    suspend fun bootstrap(profile: Profile, weekIndex: Int): DataResult<CoachBundle>
 }
 
 data class ChatMessage(val role: String, val content: String)
@@ -70,7 +71,7 @@ data class CoachResponse(
 )
 
 interface ChatRepository {
-    suspend fun send(profile: Profile, history: List<ChatMessage>, userMessage: String, locale: String?): CoachResponse
+    suspend fun send(profile: Profile, history: List<ChatMessage>, userMessage: String, locale: String?): DataResult<CoachResponse>
 }
 
 
