@@ -64,11 +64,11 @@ object DI {
         factory { GenerateTrainingPlan(get(), get()) }
         factory { LogWorkoutSet(get()) }
         factory { GenerateNutritionPlan(get(), get()) }
-        factory { BootstrapCoachData(get(), get(), get(), get(), get()) }
-        factory { EnsureCoachData(get(), get(), get(), get(), get()) }
+        factory { BootstrapCoachData(get(), get(), get(), get(), get(), get()) }
+        factory { EnsureCoachData(get(), get(), get(), get(), get(), get()) }
         factory { SyncWithBackend(get()) }
         factory { ValidateSubscription(get()) }
-        factory { AskAiTrainer(get(), get(), get(), get(), get(), get()) }
+        factory { AskAiTrainer(get(), get(), get(), get(), get(), get(), get()) }
     }
 }
 // --- Simple placeholder implementations (MVP offline-first scaffolding) ---
@@ -316,8 +316,6 @@ class StubPurchasesRepository : PurchasesRepository {
 class StubSyncRepository : SyncRepository {
     override suspend fun syncAll(): Boolean = true
 }
-
-
 
 
 

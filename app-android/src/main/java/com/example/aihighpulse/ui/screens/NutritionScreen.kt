@@ -1,50 +1,84 @@
-﻿package com.example.aihighpulse.ui.screens
+package com.example.aihighpulse.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.Button
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BakeryDining
+import androidx.compose.material.icons.filled.Egg
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.aihighpulse.R
+import com.example.aihighpulse.core.designsystem.components.BrandScreen
 import com.example.aihighpulse.core.designsystem.components.PlaceholderScreen
 import com.example.aihighpulse.core.designsystem.components.RingChart
 import com.example.aihighpulse.core.designsystem.components.StatChip
+import com.example.aihighpulse.core.designsystem.theme.AiPalette
+import com.example.aihighpulse.shared.domain.model.NutritionPlan
 import com.example.aihighpulse.ui.state.UiState
 import com.example.aihighpulse.ui.vm.NutritionViewModel
+import java.util.Locale
 import org.koin.androidx.compose.koinViewModel
+import kotlin.math.min
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NutritionScreen(
     onOpenMeal: (day: String, index: Int) -> Unit = { _, _ -> }
 ) {
     val vm: NutritionViewModel = koinViewModel()
-    val s by vm.state.collectAsState()
-    val dayOptions = listOf("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
+    val state by vm.state.collectAsState()
+    val dayOptions = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     val dayLabels = mapOf(
         "Mon" to stringResource(R.string.day_mon_short),
         "Tue" to stringResource(R.string.day_tue_short),
@@ -54,121 +88,451 @@ fun NutritionScreen(
         "Sat" to stringResource(R.string.day_sat_short),
         "Sun" to stringResource(R.string.day_sun_short)
     )
+    val locale = remember { Locale.getDefault() }
+    val contentColor = AiPalette.OnGradient
+    var tab by remember { mutableStateOf(0) }
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp
+    val isCompactWidth = screenWidthDp < 360
 
-    Column(Modifier.fillMaxSize()) {
-        Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            dayOptions.forEach { key ->
-                val selected = s.selectedDay == key
-                Text(
-                    dayLabels[key] ?: key,
+    BrandScreen(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
+            if (isCompactWidth) {
+                FlowRow(
                     modifier = Modifier
-                        .clip(MaterialTheme.shapes.small)
-                        .clickable { vm.selectDay(key) }
-                        .background(if (selected) MaterialTheme.colorScheme.primary.copy(0.15f) else Color.Transparent)
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .fillMaxWidth()
+                        .padding(top = 16.dp, start = 20.dp, end = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    maxItemsInEachRow = 4
+                ) {
+                    dayOptions.forEach { key ->
+                        DayChip(
+                            label = dayLabels[key] ?: key,
+                            selected = state.selectedDay == key,
+                            onClick = { vm.selectDay(key) }
+                        )
+                    }
+                }
+            } else {
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(horizontal = 20.dp)
+                ) {
+                    items(dayOptions.size) { index ->
+                        val key = dayOptions[index]
+                        DayChip(
+                            label = dayLabels[key] ?: key,
+                            selected = state.selectedDay == key,
+                            onClick = { vm.selectDay(key) }
+                        )
+                    }
+                }
+            }
+            TabRow(
+                selectedTabIndex = tab,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                containerColor = Color.Transparent,
+                contentColor = Color.White,
+                indicator = { positions ->
+                    if (positions.isNotEmpty()) {
+                        TabRowDefaults.Indicator(
+                            modifier = Modifier
+                                .tabIndicatorOffset(positions[tab])
+                                .padding(horizontal = 24.dp)
+                                .clip(RoundedCornerShape(50))
+                                .height(3.dp),
+                            color = Color.White.copy(alpha = 0.95f)
+                        )
+                    }
+                },
+                divider = {}
+            ) {
+                Tab(
+                    selected = tab == 0,
+                    onClick = { tab = 0 },
+                    text = {
+                        Text(
+                            stringResource(R.string.nutrition_tab_menu),
+                            color = if (tab == 0) Color.White else Color.White.copy(alpha = 0.7f),
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                )
+                Tab(
+                    selected = tab == 1,
+                    onClick = { tab = 1 },
+                    text = {
+                        Text(
+                            stringResource(R.string.nutrition_tab_shopping),
+                            color = if (tab == 1) Color.White else Color.White.copy(alpha = 0.7f),
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 )
             }
-            Spacer(Modifier.weight(1f))
-            Button(onClick = { vm.refresh() }) { Text(stringResource(R.string.action_refresh)) }
-        }
-        var tab by remember { mutableStateOf(0) }
-        TabRow(selectedTabIndex = tab) {
-            Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.nutrition_tab_menu)) })
-            Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.nutrition_tab_shopping)) })
-        }
-        Crossfade<UiState<com.example.aihighpulse.shared.domain.model.NutritionPlan>>(targetState = s.ui, label = "nutrition-ui") { st ->
-            when (st) {
-                UiState.Loading -> PlaceholderScreen(title = stringResource(R.string.nutrition_loading_title), sections = listOf("…"))
-                is UiState.Error -> PlaceholderScreen(title = stringResource(R.string.nutrition_error_title), sections = listOf(stringResource(R.string.nutrition_error_hint)))
-                is UiState.Data -> {
-                    val plan = st.value
-                    if (tab == 1) {
-                        val items = plan.shoppingList
-                        LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            items(items.size) { i -> Text(stringResource(R.string.nutrition_shopping_bullet, items[i])) }
-                        }
-                        return@Crossfade
-                    }
-                    val meals = plan.mealsByDay[s.selectedDay].orEmpty()
-                    val proteinDay = meals.sumOf { it.macros.proteinGrams }
-                    val fatDay = meals.sumOf { it.macros.fatGrams }
-                    val carbsDay = meals.sumOf { it.macros.carbsGrams }
-                    val kcalDay = meals.sumOf { it.macros.kcal }
-                    val allMeals = plan.mealsByDay.values.flatten()
-                    val proteinWeek = allMeals.sumOf { it.macros.proteinGrams }
-                    val fatWeek = allMeals.sumOf { it.macros.fatGrams }
-                    val carbsWeek = allMeals.sumOf { it.macros.carbsGrams }
-                    val kcalWeek = allMeals.sumOf { it.macros.kcal }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxSize()
+            ) {
+                Crossfade(targetState = state.ui, label = "nutrition-ui") { uiState ->
+                    when (uiState) {
+                        UiState.Loading -> PlaceholderScreen(
+                            title = stringResource(R.string.nutrition_loading_title),
+                            sections = listOf(":")
+                        )
 
-                    LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        item {
-                            Card {
-                                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                    Text(stringResource(R.string.nutrition_macros_chart_title), style = MaterialTheme.typography.titleMedium)
-                                    RingChart(
-                                        values = listOf(proteinDay.toFloat(), fatDay.toFloat(), carbsDay.toFloat()),
-                                        colors = listOf(
-                                            MaterialTheme.colorScheme.primary,
-                                            MaterialTheme.colorScheme.tertiary,
-                                            MaterialTheme.colorScheme.secondary
-                                        ),
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                        StatChip(stringResource(R.string.nutrition_macro_protein), "${proteinDay} g")
-                                        StatChip(stringResource(R.string.nutrition_macro_fat), "${fatDay} g")
-                                        StatChip(stringResource(R.string.nutrition_macro_carbs), "${carbsDay} g")
-                                    }
-                                }
-                            }
-                        }
-                        item {
-                            Card {
-                                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text(stringResource(R.string.nutrition_day_totals), style = MaterialTheme.typography.titleMedium)
-                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                        StatChip(stringResource(R.string.nutrition_macro_protein), "${proteinDay} g")
-                                        StatChip(stringResource(R.string.nutrition_macro_fat), "${fatDay} g")
-                                        StatChip(stringResource(R.string.nutrition_macro_carbs), "${carbsDay} g")
-                                        StatChip(stringResource(R.string.nutrition_macro_kcal), kcalDay.toString())
-                                    }
-                                }
-                            }
-                        }
-                        item {
-                            Card {
-                                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text(stringResource(R.string.nutrition_week_totals), style = MaterialTheme.typography.titleMedium)
-                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                        StatChip(stringResource(R.string.nutrition_macro_protein), "${proteinWeek} g")
-                                        StatChip(stringResource(R.string.nutrition_macro_fat), "${fatWeek} g")
-                                        StatChip(stringResource(R.string.nutrition_macro_carbs), "${carbsWeek} g")
-                                        StatChip(stringResource(R.string.nutrition_macro_kcal), kcalWeek.toString())
-                                    }
-                                }
-                            }
-                        }
-                        itemsIndexed(meals) { idx, meal ->
-                            Card(modifier = Modifier.clickable { onOpenMeal(s.selectedDay, idx) }) {
-                                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    Text(meal.name, style = MaterialTheme.typography.titleMedium)
-                                    Text(
-                                        stringResource(
-                                            R.string.nutrition_macros_line,
-                                            meal.kcal,
-                                            meal.macros.proteinGrams,
-                                            meal.macros.fatGrams,
-                                            meal.macros.carbsGrams
-                                        ),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(stringResource(R.string.nutrition_ingredients) + ": " + meal.ingredients.joinToString())
-                                }
-                            }
-                        }
+                        is UiState.Error -> PlaceholderScreen(
+                            title = stringResource(R.string.nutrition_error_title),
+                            sections = listOf(stringResource(R.string.nutrition_error_hint))
+                        )
+
+                        is UiState.Data -> NutritionContent(
+                            tab = tab,
+                            plan = uiState.value,
+                            selectedDay = state.selectedDay,
+                            locale = locale,
+                            contentColor = contentColor,
+                            onOpenMeal = onOpenMeal
+                        )
                     }
                 }
             }
         }
     }
 }
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun NutritionContent(
+    tab: Int,
+    plan: NutritionPlan,
+    selectedDay: String,
+    locale: Locale,
+    contentColor: Color,
+    onOpenMeal: (day: String, index: Int) -> Unit
+) {
+    if (tab == 1) {
+        val items = plan.shoppingList
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(items.size) { index ->
+                Text(stringResource(R.string.nutrition_shopping_bullet, items[index]))
+            }
+        }
+        return
+    }
+
+    val dayMeals = plan.mealsByDay[selectedDay].orEmpty()
+    val proteinDay = dayMeals.sumOf { it.macros.proteinGrams }
+    val fatDay = dayMeals.sumOf { it.macros.fatGrams }
+    val carbsDay = dayMeals.sumOf { it.macros.carbsGrams }
+    val kcalDay = dayMeals.sumOf { it.macros.kcal }
+    val allMeals = plan.mealsByDay.values.flatten()
+    val proteinWeek = allMeals.sumOf { it.macros.proteinGrams }
+    val fatWeek = allMeals.sumOf { it.macros.fatGrams }
+    val carbsWeek = allMeals.sumOf { it.macros.carbsGrams }
+    val kcalWeek = allMeals.sumOf { it.macros.kcal }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        item {
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn(tween(300)) + slideInVertically(initialOffsetY = { it / 6 }, animationSpec = tween(300))
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = nutritionCardColors(),
+                    elevation = nutritionCardElevation(),
+                    shape = MaterialTheme.shapes.extraLarge
+                ) {
+                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text(
+                            stringResource(R.string.nutrition_macros_chart_title),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = contentColor
+                        )
+                        RingChart(
+                            values = listOf(proteinDay.toFloat(), fatDay.toFloat(), carbsDay.toFloat()),
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.tertiary,
+                                MaterialTheme.colorScheme.secondary
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                                        val macroStats = listOf(
+                                            StatChipInfo(stringResource(R.string.nutrition_macro_protein).uppercase(locale), "${proteinDay} g", Icons.Filled.Egg),
+                                            StatChipInfo(stringResource(R.string.nutrition_macro_fat).uppercase(locale), "${fatDay} g", Icons.Filled.BakeryDining),
+                                            StatChipInfo(stringResource(R.string.nutrition_macro_carbs).uppercase(locale), "${carbsDay} g", Icons.Filled.WaterDrop)
+                                        )
+                                        StatChipGrid(
+                                            stats = macroStats,
+                                            columns = min(3, macroStats.size),
+                                            horizontalSpacing = 16.dp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        item {
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn(tween(350, delayMillis = 60)) + slideInVertically(initialOffsetY = { it / 6 }, animationSpec = tween(350))
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = nutritionCardColors(),
+                    elevation = nutritionCardElevation(),
+                    shape = MaterialTheme.shapes.extraLarge
+                ) {
+                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text(
+                            stringResource(R.string.nutrition_day_totals),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = contentColor
+                        )
+                                        StatChipGrid(
+                                            stats = listOf(
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_protein).uppercase(locale), "${proteinDay} g", Icons.Filled.Egg),
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_fat).uppercase(locale), "${fatDay} g", Icons.Filled.BakeryDining),
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_carbs).uppercase(locale), "${carbsDay} g", Icons.Filled.WaterDrop),
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_kcal).uppercase(locale), kcalDay.toString(), Icons.Filled.LocalFireDepartment)
+                                            ),
+                                            columns = 2
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        item {
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn(tween(400, delayMillis = 100)) + slideInVertically(initialOffsetY = { it / 6 }, animationSpec = tween(400))
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = nutritionCardColors(),
+                    elevation = nutritionCardElevation(),
+                    shape = MaterialTheme.shapes.extraLarge
+                ) {
+                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text(
+                            stringResource(R.string.nutrition_week_totals),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = contentColor
+                        )
+                                        StatChipGrid(
+                                            stats = listOf(
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_protein).uppercase(locale), "${proteinWeek} g", Icons.Filled.Egg),
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_fat).uppercase(locale), "${fatWeek} g", Icons.Filled.BakeryDining),
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_carbs).uppercase(locale), "${carbsWeek} g", Icons.Filled.WaterDrop),
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_kcal).uppercase(locale), kcalWeek.toString(), Icons.Filled.LocalFireDepartment)
+                                            ),
+                                            columns = 2
+                                        )
+                                    }
+                                }
+                            }
+        }
+        itemsIndexed(dayMeals) { index, meal ->
+            val accent = macroAccentPalette[index % macroAccentPalette.size]
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn(tween(350)) + slideInVertically(initialOffsetY = { it / 8 }, animationSpec = tween(350))
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onOpenMeal(selectedDay, index) },
+                    colors = nutritionCardColors(),
+                    elevation = nutritionCardElevation(),
+                    shape = MaterialTheme.shapes.extraLarge
+                ) {
+                    Column(
+                        Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .height(48.dp)
+                                        .width(6.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(accent)
+                                )
+                                Column {
+                                    Text(
+                                        meal.name,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF2D2D2D)
+                                    )
+                                    Text(
+                                        "${meal.ingredients.size} items - ${meal.macros.kcal} kcal",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color(0xFF4B4B4B)
+                                    )
+                                }
+                            }
+                            Text(
+                                "${meal.kcal} kcal",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            MacroPill(
+                                stringResource(R.string.nutrition_macro_protein),
+                                "${meal.macros.proteinGrams} g",
+                                accent
+                            )
+                            MacroPill(
+                                stringResource(R.string.nutrition_macro_fat),
+                                "${meal.macros.fatGrams} g",
+                                MaterialTheme.colorScheme.secondary
+                            )
+                            MacroPill(
+                                stringResource(R.string.nutrition_macro_carbs),
+                                "${meal.macros.carbsGrams} g",
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                        }
+                        Text(
+                            text = stringResource(R.string.nutrition_ingredients) + ": " + meal.ingredients.joinToString(),
+                            style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
+                            color = Color(0xFF3A3A3A)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun nutritionCardColors() = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.97f))
+
+@Composable
+private fun nutritionCardElevation() = CardDefaults.cardElevation(defaultElevation = 10.dp)
+
+private val macroAccentPalette = listOf(
+    Color(0xFFB388FF),
+    Color(0xFF80DEEA),
+    Color(0xFFFFB74D),
+    Color(0xFFFF8A80)
+)
+
+@Composable
+private fun DayChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(18.dp)
+    Box(
+        modifier = Modifier
+            .clip(shape)
+            .background(if (selected) Color.White.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.08f))
+            .border(1.dp, Color.White.copy(alpha = if (selected) 0.9f else 0.25f), shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
+    ) {
+        Text(
+            label,
+            fontWeight = FontWeight.SemiBold,
+            color = if (selected) Color.White else Color.White.copy(alpha = 0.8f)
+        )
+    }
+}
+
+@Composable
+private fun MacroPill(
+    label: String,
+    value: String,
+    accent: Color
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(label, style = MaterialTheme.typography.labelMedium, color = Color(0xFF646A81))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(accent)
+            )
+            Text(
+                value,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2D2D2D)
+            )
+        }
+    }
+}
+
+private data class StatChipInfo(
+    val label: String,
+    val value: String,
+    val icon: ImageVector
+)
+
+@Composable
+private fun StatChipGrid(
+    stats: List<StatChipInfo>,
+    columns: Int,
+    horizontalSpacing: Dp = 12.dp,
+    verticalSpacing: Dp = 12.dp
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(verticalSpacing)) {
+        stats.chunked(columns).forEach { rowItems ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)
+            ) {
+                rowItems.forEach { stat ->
+                    StatChip(
+                        label = stat.label,
+                        value = stat.value,
+                        icon = stat.icon,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                repeat(columns - rowItems.size) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+

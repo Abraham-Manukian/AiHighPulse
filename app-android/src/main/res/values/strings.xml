@@ -60,6 +60,9 @@
     <string name="label_allergies">Allergies</string>
     <string name="placeholder_allergies">e.g. peanuts, lactose</string>
     <string name="label_weekdays">Training days</string>
+    <string name="label_language">App language</string>
+    <string name="language_en">English</string>
+    <string name="language_ru">Russian</string>
     <string name="save_and_continue">Save and continue</string>
     <string name="error_invalid_input">Please check input values</string>
 

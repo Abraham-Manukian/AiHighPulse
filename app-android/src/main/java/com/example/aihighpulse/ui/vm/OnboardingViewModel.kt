@@ -7,6 +7,9 @@ import com.example.aihighpulse.shared.domain.model.Equipment
 import com.example.aihighpulse.shared.domain.model.Goal
 import com.example.aihighpulse.shared.domain.model.Profile
 import com.example.aihighpulse.shared.domain.model.Sex
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import com.example.aihighpulse.shared.domain.repository.PreferencesRepository
 import com.example.aihighpulse.shared.domain.repository.ProfileRepository
 import com.example.aihighpulse.shared.domain.usecase.BootstrapCoachData
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +33,7 @@ data class OnboardingState(
     val days: Map<String, Boolean> = mapOf(
         "Mon" to true, "Tue" to true, "Wed" to false, "Thu" to true, "Fri" to false, "Sat" to false, "Sun" to false
     ),
+    val languageTag: String = "system",
     val saving: Boolean = false,
     val error: String? = null
 )
@@ -37,9 +41,15 @@ data class OnboardingState(
 class OnboardingViewModel(
     private val profileRepository: ProfileRepository,
     private val bootstrapCoachData: BootstrapCoachData,
+    private val preferencesRepository: PreferencesRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(OnboardingState())
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
+
+    init {
+        val tag = preferencesRepository.getLanguageTag() ?: "system"
+        _state.value = _state.value.copy(languageTag = tag)
+    }
 
     fun update(block: (OnboardingState) -> OnboardingState) { _state.value = block(_state.value) }
 
@@ -52,6 +62,17 @@ class OnboardingViewModel(
 
     fun setCustomEquipment(value: String) {
         update { it.copy(customEquipment = value.take(200)) }
+    }
+
+    fun setLanguage(tag: String) {
+        update { it.copy(languageTag = tag) }
+        if (tag == "system") {
+            preferencesRepository.setLanguageTag(null)
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+        } else {
+            preferencesRepository.setLanguageTag(tag)
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))
+        }
     }
 
     fun save(onSuccess: () -> Unit) {
@@ -82,6 +103,8 @@ class OnboardingViewModel(
                 weeklySchedule = s.days,
                 budgetLevel = 2
             )
+            // ensure language preference persisted even if user didn't tap chips again
+            setLanguage(s.languageTag)
             profileRepository.upsertProfile(profile)
             runCatching { bootstrapCoachData() }.onFailure { it.printStackTrace() }
             _state.value = s.copy(saving = false)

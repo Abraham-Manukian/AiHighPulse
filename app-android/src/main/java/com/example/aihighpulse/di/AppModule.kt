@@ -21,7 +21,7 @@ object AppModule {
         single { AppDatabase(get()) }
 
         // ViewModels
-        viewModel { OnboardingViewModel(get(), get()) }
+        viewModel { OnboardingViewModel(get(), get(), get()) }
         viewModel { HomeViewModel(get(), get()) }
         viewModel { WorkoutViewModel(get(), get(), get()) }
         viewModel { NutritionViewModel(get(), get()) }

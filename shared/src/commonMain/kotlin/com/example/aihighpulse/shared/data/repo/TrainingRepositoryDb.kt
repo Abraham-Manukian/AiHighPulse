@@ -97,11 +97,14 @@ class TrainingRepositoryDb(
             }
 
     private fun persistPlan(plan: TrainingPlan) {
-        db.workoutQueries.deleteWorkoutsByWeek(plan.weekIndex.toLong())
-        plan.workouts.forEach { workout ->
-            db.workoutQueries.insertWorkout(workout.id, plan.weekIndex.toLong(), workout.date.toString())
-            workout.sets.forEach { set ->
-                db.workoutQueries.insertSet(workout.id, set.exerciseId, set.reps.toLong(), set.weightKg, set.rpe)
+        db.workoutQueries.transaction {
+            db.workoutQueries.deleteSetsByWeek(plan.weekIndex.toLong())
+            db.workoutQueries.deleteWorkoutsByWeek(plan.weekIndex.toLong())
+            plan.workouts.forEach { workout ->
+                db.workoutQueries.insertWorkout(workout.id, plan.weekIndex.toLong(), workout.date.toString())
+                workout.sets.forEach { set ->
+                    db.workoutQueries.insertSet(workout.id, set.exerciseId, set.reps.toLong(), set.weightKg, set.rpe)
+                }
             }
         }
     }

@@ -15,6 +15,8 @@ private const val KEY_NUTRITION = "cache_nutrition_plan"
 private const val KEY_ADVICE = "cache_sleep_advice"
 private const val KEY_BUNDLE = "cache_bootstrap_bundle"
 private const val KEY_CHAT = "cache_chat_response"
+private const val KEY_BUNDLE_VERSION = "cache_bundle_version"
+private const val KEY_BUNDLE_TIMESTAMP = "cache_bundle_timestamp"
 
 class AiResponseCache(
     private val settings: Settings,
@@ -47,6 +49,20 @@ class AiResponseCache(
 
     fun lastBundle(): AiBootstrapResponseDto? =
         settings.getStringOrNull(KEY_BUNDLE)?.let { runCatching { json.decodeFromString<AiBootstrapResponseDto>(it) }.getOrNull() }
+
+    fun bundleVersion(): Int? = settings.getIntOrNull(KEY_BUNDLE_VERSION)
+
+    fun bundleTimestampMillis(): Long? = settings.getLongOrNull(KEY_BUNDLE_TIMESTAMP)
+
+    fun markBundleFresh(version: Int, timestampMillis: Long) {
+        settings.putInt(KEY_BUNDLE_VERSION, version)
+        settings.putLong(KEY_BUNDLE_TIMESTAMP, timestampMillis)
+    }
+
+    fun clearBundleMetadata() {
+        settings.remove(KEY_BUNDLE_VERSION)
+        settings.remove(KEY_BUNDLE_TIMESTAMP)
+    }
 
     fun storeChatResponse(dto: ChatResponse) {
         settings.putString(KEY_CHAT, json.encodeToString(dto))

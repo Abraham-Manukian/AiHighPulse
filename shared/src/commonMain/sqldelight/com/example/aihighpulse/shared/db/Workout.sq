@@ -46,3 +46,6 @@ FROM Workout w
 LEFT JOIN WorkoutSet s ON s.workoutId = w.id
 WHERE w.weekIndex = ?
 ORDER BY w.date;
+
+deleteSetsByWeek:
+DELETE FROM WorkoutSet WHERE workoutId IN (SELECT id FROM Workout WHERE weekIndex = ?);

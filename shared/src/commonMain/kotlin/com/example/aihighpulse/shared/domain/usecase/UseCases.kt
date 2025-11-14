@@ -1,10 +1,13 @@
 package com.example.aihighpulse.shared.domain.usecase
 
+import com.example.aihighpulse.shared.data.repo.AiResponseCache
 import com.example.aihighpulse.shared.domain.model.*
 import com.example.aihighpulse.shared.domain.repository.*
 import com.example.aihighpulse.shared.domain.util.DataResult
+import com.example.aihighpulse.shared.domain.util.CoachDataFreshness
 import kotlinx.coroutines.flow.Flow
 import io.github.aakira.napier.Napier
+import kotlinx.datetime.Clock
 
 class GenerateTrainingPlan(
     private val profileRepository: ProfileRepository,
@@ -39,7 +42,8 @@ class BootstrapCoachData(
     private val aiTrainerRepository: AiTrainerRepository,
     private val trainingRepository: TrainingRepository,
     private val nutritionRepository: NutritionRepository,
-    private val adviceRepository: AdviceRepository
+    private val adviceRepository: AdviceRepository,
+    private val aiResponseCache: AiResponseCache
 ) {
     suspend operator fun invoke(weekIndex: Int = 0): Boolean {
         val profile = profileRepository.getProfile() ?: return false
@@ -64,6 +68,11 @@ class BootstrapCoachData(
         val advice = bundle?.sleepAdvice ?: adviceRepository.getAdvice(profile, mapOf("topic" to "sleep"))
         adviceRepository.saveAdvice("sleep", advice)
 
+        aiResponseCache.markBundleFresh(
+            version = CoachDataFreshness.SCHEMA_VERSION,
+            timestampMillis = Clock.System.now().toEpochMilliseconds()
+        )
+
         return true
     }
 }
@@ -76,12 +85,23 @@ class EnsureCoachData(
     private val nutritionRepository: NutritionRepository,
     private val adviceRepository: AdviceRepository,
     private val bootstrapCoachData: BootstrapCoachData,
+    private val aiResponseCache: AiResponseCache,
 ) {
     suspend operator fun invoke(weekIndex: Int = 0, force: Boolean = false): Boolean {
         if (profileRepository.getProfile() == null) return false
-        val needsTraining = force || !trainingRepository.hasPlan(weekIndex)
-        val needsNutrition = force || !nutritionRepository.hasPlan(weekIndex)
-        val needsAdvice = force || !adviceRepository.hasAdvice("sleep")
+        val now = Clock.System.now().toEpochMilliseconds()
+        val version = aiResponseCache.bundleVersion() ?: -1
+        val versionMismatch = version < CoachDataFreshness.SCHEMA_VERSION
+        val stale = aiResponseCache.bundleTimestampMillis()
+            ?.let { now - it > CoachDataFreshness.STALE_AFTER_MILLIS }
+            ?: true
+        val needsRefresh = force || versionMismatch || stale
+        val needsTraining = needsRefresh || !trainingRepository.hasPlan(weekIndex)
+        val needsNutrition = needsRefresh || !nutritionRepository.hasPlan(weekIndex)
+        val needsAdvice = needsRefresh || !adviceRepository.hasAdvice("sleep")
+        if (versionMismatch) {
+            aiResponseCache.clearBundleMetadata()
+        }
         if (!needsTraining && !needsNutrition && !needsAdvice) return true
         return bootstrapCoachData(weekIndex)
     }
