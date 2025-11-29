@@ -49,3 +49,6 @@ ORDER BY w.date;
 
 deleteSetsByWeek:
 DELETE FROM WorkoutSet WHERE workoutId IN (SELECT id FROM Workout WHERE weekIndex = ?);
+
+deleteAllWorkouts:
+DELETE FROM Workout;

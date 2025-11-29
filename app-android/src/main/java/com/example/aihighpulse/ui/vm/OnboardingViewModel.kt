@@ -1,5 +1,7 @@
-﻿package com.example.aihighpulse.ui.vm
+package com.example.aihighpulse.ui.vm
 
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aihighpulse.shared.domain.model.Constraints
@@ -7,8 +9,6 @@ import com.example.aihighpulse.shared.domain.model.Equipment
 import com.example.aihighpulse.shared.domain.model.Goal
 import com.example.aihighpulse.shared.domain.model.Profile
 import com.example.aihighpulse.shared.domain.model.Sex
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 import com.example.aihighpulse.shared.domain.repository.PreferencesRepository
 import com.example.aihighpulse.shared.domain.repository.ProfileRepository
 import com.example.aihighpulse.shared.domain.usecase.BootstrapCoachData
@@ -17,7 +17,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-private val DEFAULT_EQUIPMENT = setOf("���⥫�", "��୨�")
+private val DEFAULT_EQUIPMENT = setOf("Dumbbells", "Barbell")
+const val ONBOARDING_TOTAL_STEPS = 6
 
 data class OnboardingState(
     val age: String = "28",
@@ -34,6 +35,7 @@ data class OnboardingState(
         "Mon" to true, "Tue" to true, "Wed" to false, "Thu" to true, "Fri" to false, "Sat" to false, "Sun" to false
     ),
     val languageTag: String = "system",
+    val currentStep: Int = 0,
     val saving: Boolean = false,
     val error: String? = null
 )
@@ -45,6 +47,8 @@ class OnboardingViewModel(
 ) : ViewModel() {
     private val _state = MutableStateFlow(OnboardingState())
     val state: StateFlow<OnboardingState> = _state.asStateFlow()
+
+    private val lastStepIndex = ONBOARDING_TOTAL_STEPS - 1
 
     init {
         val tag = preferencesRepository.getLanguageTag() ?: "system"
@@ -62,6 +66,14 @@ class OnboardingViewModel(
 
     fun setCustomEquipment(value: String) {
         update { it.copy(customEquipment = value.take(200)) }
+    }
+
+    fun nextStep() {
+        update { st -> st.copy(currentStep = (st.currentStep + 1).coerceAtMost(lastStepIndex)) }
+    }
+
+    fun prevStep() {
+        update { st -> st.copy(currentStep = (st.currentStep - 1).coerceAtLeast(0)) }
     }
 
     fun setLanguage(tag: String) {
@@ -98,8 +110,8 @@ class OnboardingViewModel(
                 experienceLevel = s.experienceLevel,
                 constraints = Constraints(),
                 equipment = Equipment(items = allEquipment),
-                dietaryPreferences = s.dietaryPreferences.split(',',';','\n').map { it.trim() }.filter { it.isNotEmpty() },
-                allergies = s.allergies.split(',',';','\n').map { it.trim() }.filter { it.isNotEmpty() },
+                dietaryPreferences = s.dietaryPreferences.split(',', ';', '\n').map { it.trim() }.filter { it.isNotEmpty() },
+                allergies = s.allergies.split(',', ';', '\n').map { it.trim() }.filter { it.isNotEmpty() },
                 weeklySchedule = s.days,
                 budgetLevel = 2
             )

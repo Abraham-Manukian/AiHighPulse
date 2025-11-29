@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bedtime
@@ -52,18 +51,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.outlined.KeyboardBackspace
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import com.example.aihighpulse.R
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -71,6 +69,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.aihighpulse.core.designsystem.theme.AiGradients
 import com.example.aihighpulse.ui.navigation.Routes
+import com.example.aihighpulse.ui.navigation.Routes.bottomNavRoutes
 import com.example.aihighpulse.ui.navigation.nutritionDetail
 import com.example.aihighpulse.ui.screens.*
 import com.example.aihighpulse.ui.theme.AiHighPulseTheme
@@ -105,6 +104,8 @@ fun AppRoot() {
     val currentRoute = backStackEntry?.destination?.route
     val currentTitle = destinations.firstOrNull { it.route == currentRoute }?.label ?: "AiHighPulse"
     val showChrome = currentRoute != Routes.Onboarding
+    val showBottomBar = currentRoute in bottomNavRoutes
+
 
     Box(
         modifier = Modifier
@@ -134,6 +135,11 @@ fun AppRoot() {
                             }
                         },
                         actions = {
+                            if (currentRoute !in bottomNavRoutes){
+                                IconButton(onClick = {nav.navigate(Routes.Home)}) {
+                                    Icon(Icons.Outlined.KeyboardBackspace, contentDescription = "back")
+                                }
+                            }
                             IconButton(onClick = { nav.navigate(Routes.Paywall) }) {
                                 Icon(Icons.Outlined.Star, contentDescription = "Pro")
                             }
@@ -190,7 +196,7 @@ fun AppRoot() {
                 }
             }
         }
-        if (showChrome && !useRail) {
+        if (showBottomBar && showChrome && !useRail) {
             FloatingNavBar(
                 destinations = destinations,
                 currentRoute = currentRoute,
@@ -240,7 +246,16 @@ fun AppNavHost(nav: NavHostController) {
         composable(Routes.Sleep) { SleepScreen() }
         composable(Routes.Progress) { ProgressScreen() }
         composable(Routes.Paywall) { PaywallScreen() }
-        composable(Routes.Settings) { SettingsScreen() }
+        composable(Routes.Settings) {
+            SettingsScreen(
+                onEditProfile = { nav.navigate(Routes.EditProfile) }
+            )
+        }
+        composable(Routes.EditProfile) {
+            EditProfileScreen(
+                onDone = { nav.popBackStack() }
+            )
+        }
         composable(Routes.Chat) { ChatScreen() }
     }
 }
@@ -373,5 +388,3 @@ private fun FloatingNavBar(
     }
 
 }
-
-

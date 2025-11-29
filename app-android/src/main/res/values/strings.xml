@@ -1,5 +1,5 @@
 ﻿<resources>
-    <string name="app_name">AiHighPulse</string>
+    <string name="app_name">V TEMPE</string>
 
     <!-- Navigation -->
     <string name="nav_home">Home</string>
@@ -40,6 +40,8 @@
     <!-- Onboarding -->
     <string name="onboard_title">Welcome to AiHighPulse</string>
     <string name="onboard_subtitle">Smart training, nutrition and sleep tailored to your goals.</string>
+    <string name="onboard_cta">Save and start</string>
+    <string name="onboard_step_counter">Step %1$d of %2$d</string>
     <string name="label_age">Age</string>
     <string name="label_height_cm">Height, cm</string>
     <string name="label_weight_kg">Weight, kg</string>
@@ -64,7 +66,24 @@
     <string name="language_en">English</string>
     <string name="language_ru">Russian</string>
     <string name="save_and_continue">Save and continue</string>
+    <string name="action_next">Next</string>
     <string name="error_invalid_input">Please check input values</string>
+    <string name="workout_sets_scheduled">%1$d sets scheduled</string>
+    <string name="workout_progress_status">%1$d%% · %2$d/%3$d</string>
+    <string name="equipment_dumbbells">Dumbbells</string>
+    <string name="equipment_barbell">Barbell</string>
+    <string name="equipment_kettlebell">Kettlebell</string>
+    <string name="equipment_bands">Resistance bands</string>
+    <string name="equipment_bench">Bench</string>
+    <string name="equipment_pullup_bar">Pull-up bar</string>
+    <string name="equipment_trx">TRX / suspension</string>
+    <string name="equipment_mat">Yoga mat</string>
+    <string name="equipment_cardio">Cardio machine</string>
+    <string name="nutrition_meal_meta">%1$d items · %2$d kcal</string>
+    <string name="nutrition_kcal_value">%1$d kcal</string>
+    <string name="nutrition_macros_detail">Protein: %1$d g  Fat: %2$d g  Carbs: %3$d g</string>
+    <string name="nutrition_grams_value">%1$d g</string>
+    <string name="sleep_hours_short">%1$d h</string>
 
     <!-- Generic -->
     <string name="loading">Loading</string>
@@ -90,7 +109,7 @@
     <string name="workout_reps_unit">reps</string>
     <string name="workout_weight_display">%1$.1f kg</string>
     <string name="workout_weight_bodyweight">Bodyweight</string>
-    <string name="workout_set_summary">%1$d reps · %2$s · RPE %3$.1f</string>
+    <string name="workout_set_summary">%1$d reps · %2$s</string>
 
     <!-- Nutrition -->
     <string name="action_refresh">Refresh</string>
@@ -143,6 +162,15 @@
     <string name="settings_language_title">Language</string>
     <string name="settings_language_ru">Russian</string>
     <string name="settings_language_system">System default</string>
+    <string name="settings_weight_label">Weight</string>
+    <string name="settings_weight_value">%1$.1f kg</string>
+    <string name="settings_height_label">Height</string>
+    <string name="settings_height_value">%1$d cm</string>
+    <string name="settings_experience_label">Experience</string>
+    <string name="settings_experience_value">%1$d / 5</string>
+    <string name="settings_days_label">Days/week</string>
+    <string name="settings_bmi_label">BMI</string>
+    <string name="settings_goal_label">Goal</string>
     <string name="settings_theme_title">Theme</string>
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
@@ -155,6 +183,9 @@
     <string name="paywall_cta">Purchase (stub)</string>
     <string name="paywall_monthly">Monthly</string>
     <string name="paywall_yearly">Yearly</string>
+    <string name="paywall_best_value">Best value</string>
+    <string name="edit_profile_title">Edit profile</string>
+    <string name="edit_profile_save">Save changes</string>
 
     <!-- Chat -->
     <string name="chat_title">AI Coach</string>

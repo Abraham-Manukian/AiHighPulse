@@ -52,4 +52,18 @@ class ProfileRepositoryDb(
         db.profileDetailsQueries.deleteScheduleForProfile(profile.id)
         profile.weeklySchedule.forEach { (day, active) -> db.profileDetailsQueries.insertSchedule(profile.id, day, if (active) 1L else 0L) }
     }
+
+    override suspend fun clearAll() {
+        // Order matters because WorkoutSet/MealIngredient depend on parent rows.
+        db.workoutQueries.deleteAllWorkouts()
+        db.nutritionQueries.deleteAllMealByDay()
+        db.nutritionQueries.deleteAllMealIngredients()
+        db.nutritionQueries.deleteAllMeals()
+
+        db.profileDetailsQueries.deleteAllEquipment()
+        db.profileDetailsQueries.deleteAllDietPrefs()
+        db.profileDetailsQueries.deleteAllAllergies()
+        db.profileDetailsQueries.deleteAllSchedule()
+        db.profileQueries.deleteAllProfiles()
+    }
 }

@@ -1,4 +1,4 @@
-﻿package com.example.aihighpulse.ui.screens
+package com.example.aihighpulse.ui.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -169,13 +169,11 @@ fun WorkoutScreen() {
                                                 val weightLabel = set.weightKg?.let {
                                                     stringResource(R.string.workout_weight_display, it)
                                                 } ?: stringResource(R.string.workout_weight_bodyweight)
-                                                val rpeValue = set.rpe ?: 7.0
-                                                Text(
+                                                                                                Text(
                                                     stringResource(
                                                         R.string.workout_set_summary,
                                                         set.reps,
-                                                        weightLabel,
-                                                        rpeValue
+                                                        weightLabel
                                                     ),
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
@@ -218,8 +216,8 @@ fun WorkoutScreen() {
 
         if (showAddSheet.value) {
             ModalBottomSheet(onDismissRequest = { showAddSheet.value = false }) {
-                AddSetPanel(onAdd = { ex, reps, weight, rpe ->
-                    vm.addSet(ex, reps, weight, rpe)
+                AddSetPanel(onAdd = { ex, reps, weight ->
+                    vm.addSet(ex, reps, weight)
                     showAddSheet.value = false
                 })
             }
@@ -237,11 +235,10 @@ private fun workoutCardElevation() = CardDefaults.cardElevation(defaultElevation
 private fun workoutButtonColors() = ButtonDefaults.buttonColors(containerColor = AiPalette.DeepAccent, contentColor = Color.White)
 
 @Composable
-private fun AddSetPanel(onAdd: (exerciseId: String, reps: Int, weight: Double?, rpe: Double?) -> Unit) {
+private fun AddSetPanel(onAdd: (exerciseId: String, reps: Int, weight: Double?) -> Unit) {
     val ex = remember { mutableStateOf("squat") }
     val reps = remember { mutableStateOf("10") }
     val weight = remember { mutableStateOf("40") }
-    val rpe = remember { mutableStateOf("7.5") }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -255,11 +252,16 @@ private fun AddSetPanel(onAdd: (exerciseId: String, reps: Int, weight: Double?, 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(ex.value, onValueChange = { ex.value = it }, label = { Text(stringResource(R.string.workout_exercise_label)) }, modifier = Modifier.weight(1f), shape = MaterialTheme.shapes.medium)
                 OutlinedTextField(reps.value, onValueChange = { reps.value = it.filter { c -> c.isDigit() }.take(3) }, label = { Text(stringResource(R.string.workout_reps_label)) }, modifier = Modifier.weight(1f), shape = MaterialTheme.shapes.medium)
-                OutlinedTextField(weight.value, onValueChange = { weight.value = it.filter { c -> c.isDigit() || c == '.' }.take(5) }, label = { Text(stringResource(R.string.workout_weight_label)) }, modifier = Modifier.weight(1f), shape = MaterialTheme.shapes.medium)
-                OutlinedTextField(rpe.value, onValueChange = { rpe.value = it.filter { c -> c.isDigit() || c == '.' }.take(4) }, label = { Text(stringResource(R.string.workout_rpe_label)) }, modifier = Modifier.weight(1f), shape = MaterialTheme.shapes.medium)
+                OutlinedTextField(
+                    weight.value,
+                    onValueChange = { weight.value = it.filter { ch -> ch.isDigit() || ch == '.' }.take(5) },
+                    label = { Text(stringResource(R.string.workout_weight_label)) },
+                    modifier = Modifier.weight(1f),
+                    shape = MaterialTheme.shapes.medium
+                )
             }
             Button(onClick = {
-                onAdd(ex.value, reps.value.toIntOrNull() ?: 10, weight.value.toDoubleOrNull(), rpe.value.toDoubleOrNull())
+                onAdd(ex.value, reps.value.toIntOrNull() ?: 10, weight.value.toDoubleOrNull())
             }, colors = workoutButtonColors(), elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp, pressedElevation = 8.dp)) { Text(stringResource(R.string.workout_add_button)) }
         }
     }
@@ -346,7 +348,7 @@ private fun WorkoutCardHeader(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    "$setsCount sets scheduled",
+                    stringResource(R.string.workout_sets_scheduled, setsCount),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -364,7 +366,7 @@ private fun WorkoutCardHeader(
             contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp)
         ) {
             Text(
-                "${(progress * 100).roundToInt()}% · $completed/${setsCount}",
+                stringResource(R.string.workout_progress_status, (progress * 100).roundToInt(), completed, setsCount),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold
             )
@@ -399,3 +401,6 @@ private fun iconForExercise(exerciseId: String): ImageVector = when {
     exerciseId.contains("yoga", ignoreCase = true) -> Icons.Filled.SelfImprovement
     else -> Icons.Filled.FitnessCenter
 }
+
+
+

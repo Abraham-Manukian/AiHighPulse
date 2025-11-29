@@ -58,7 +58,7 @@ fun ProgressScreen() {
                     stringResource(R.string.progress_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = contentColor
+                    color = Color.White
                 )
             }
             item {

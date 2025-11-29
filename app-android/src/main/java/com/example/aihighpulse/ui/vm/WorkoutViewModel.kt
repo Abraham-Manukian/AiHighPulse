@@ -49,9 +49,9 @@ class WorkoutViewModel(
 
     fun select(workoutId: String) { _state.value = _state.value.copy(selectedWorkoutId = workoutId) }
 
-    fun addSet(exerciseId: String, reps: Int, weight: Double?, rpe: Double?) {
+    fun addSet(exerciseId: String, reps: Int, weight: Double?) {
         val id = _state.value.selectedWorkoutId ?: return
-        viewModelScope.launch { logWorkoutSet(id, WorkoutSet(exerciseId, reps, weight, rpe)) }
+        viewModelScope.launch { logWorkoutSet(id, WorkoutSet(exerciseId, reps, weight, null)) }
     }
 
     fun toggleSetCompleted(workoutId: String, index: Int, completed: Boolean) {
@@ -77,3 +77,4 @@ class WorkoutViewModel(
         // Hook for future AI sync
     }
 }
+

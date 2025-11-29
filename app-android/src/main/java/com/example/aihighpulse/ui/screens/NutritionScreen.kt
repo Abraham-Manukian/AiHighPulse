@@ -5,6 +5,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,6 +29,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BakeryDining
@@ -224,8 +226,59 @@ private fun NutritionContent(
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(items.size) { index ->
-                Text(stringResource(R.string.nutrition_shopping_bullet, items[index]))
+            item {
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn(tween(250)) + slideInVertically(initialOffsetY = { it / 10 }, animationSpec = tween(250))
+                ) {
+                    val bulletColor = AiPalette.Primary
+                    val textColor = Color(0xFF2D2D2D)
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = nutritionCardColors(),
+                        elevation = nutritionCardElevation(),
+                        shape = MaterialTheme.shapes.extraLarge
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Text(
+                                stringResource(R.string.nutrition_tab_shopping),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = textColor
+                            )
+                            items.forEachIndexed { index, entry ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(10.dp)
+                                            .clip(CircleShape)
+                                            .background(bulletColor.copy(alpha = 0.9f))
+                                    )
+                                    Text(
+                                        text = entry,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = textColor,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                                if (index != items.lastIndex) {
+                                    Divider(color = textColor.copy(alpha = 0.1f))
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         return
@@ -275,9 +328,9 @@ private fun NutritionContent(
                             modifier = Modifier.fillMaxWidth()
                         )
                                         val macroStats = listOf(
-                                            StatChipInfo(stringResource(R.string.nutrition_macro_protein).uppercase(locale), "${proteinDay} g", Icons.Filled.Egg),
-                                            StatChipInfo(stringResource(R.string.nutrition_macro_fat).uppercase(locale), "${fatDay} g", Icons.Filled.BakeryDining),
-                                            StatChipInfo(stringResource(R.string.nutrition_macro_carbs).uppercase(locale), "${carbsDay} g", Icons.Filled.WaterDrop)
+                                            StatChipInfo(stringResource(R.string.nutrition_macro_protein).uppercase(locale), stringResource(R.string.nutrition_grams_value, proteinDay), Icons.Filled.Egg),
+                                            StatChipInfo(stringResource(R.string.nutrition_macro_fat).uppercase(locale), stringResource(R.string.nutrition_grams_value, fatDay), Icons.Filled.BakeryDining),
+                                            StatChipInfo(stringResource(R.string.nutrition_macro_carbs).uppercase(locale), stringResource(R.string.nutrition_grams_value, carbsDay), Icons.Filled.WaterDrop)
                                         )
                                         StatChipGrid(
                                             stats = macroStats,
@@ -308,9 +361,9 @@ private fun NutritionContent(
                         )
                                         StatChipGrid(
                                             stats = listOf(
-                                                StatChipInfo(stringResource(R.string.nutrition_macro_protein).uppercase(locale), "${proteinDay} g", Icons.Filled.Egg),
-                                                StatChipInfo(stringResource(R.string.nutrition_macro_fat).uppercase(locale), "${fatDay} g", Icons.Filled.BakeryDining),
-                                                StatChipInfo(stringResource(R.string.nutrition_macro_carbs).uppercase(locale), "${carbsDay} g", Icons.Filled.WaterDrop),
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_protein).uppercase(locale), stringResource(R.string.nutrition_grams_value, proteinDay), Icons.Filled.Egg),
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_fat).uppercase(locale), stringResource(R.string.nutrition_grams_value, fatDay), Icons.Filled.BakeryDining),
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_carbs).uppercase(locale), stringResource(R.string.nutrition_grams_value, carbsDay), Icons.Filled.WaterDrop),
                                                 StatChipInfo(stringResource(R.string.nutrition_macro_kcal).uppercase(locale), kcalDay.toString(), Icons.Filled.LocalFireDepartment)
                                             ),
                                             columns = 2
@@ -339,9 +392,9 @@ private fun NutritionContent(
                         )
                                         StatChipGrid(
                                             stats = listOf(
-                                                StatChipInfo(stringResource(R.string.nutrition_macro_protein).uppercase(locale), "${proteinWeek} g", Icons.Filled.Egg),
-                                                StatChipInfo(stringResource(R.string.nutrition_macro_fat).uppercase(locale), "${fatWeek} g", Icons.Filled.BakeryDining),
-                                                StatChipInfo(stringResource(R.string.nutrition_macro_carbs).uppercase(locale), "${carbsWeek} g", Icons.Filled.WaterDrop),
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_protein).uppercase(locale), stringResource(R.string.nutrition_grams_value, proteinWeek), Icons.Filled.Egg),
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_fat).uppercase(locale), stringResource(R.string.nutrition_grams_value, fatWeek), Icons.Filled.BakeryDining),
+                                                StatChipInfo(stringResource(R.string.nutrition_macro_carbs).uppercase(locale), stringResource(R.string.nutrition_grams_value, carbsWeek), Icons.Filled.WaterDrop),
                                                 StatChipInfo(stringResource(R.string.nutrition_macro_kcal).uppercase(locale), kcalWeek.toString(), Icons.Filled.LocalFireDepartment)
                                             ),
                                             columns = 2
@@ -392,14 +445,14 @@ private fun NutritionContent(
                                         color = Color(0xFF2D2D2D)
                                     )
                                     Text(
-                                        "${meal.ingredients.size} items - ${meal.macros.kcal} kcal",
+                                        stringResource(R.string.nutrition_meal_meta, meal.ingredients.size, meal.macros.kcal),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Color(0xFF4B4B4B)
                                     )
                                 }
                             }
                             Text(
-                                "${meal.kcal} kcal",
+                                stringResource(R.string.nutrition_kcal_value, meal.kcal),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
@@ -411,18 +464,16 @@ private fun NutritionContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             MacroPill(
-                                stringResource(R.string.nutrition_macro_protein),
-                                "${meal.macros.proteinGrams} g",
-                                accent
+                                stringResource(R.string.nutrition_macro_protein), stringResource(R.string.nutrition_grams_value, meal.macros.proteinGrams), accent
                             )
                             MacroPill(
                                 stringResource(R.string.nutrition_macro_fat),
-                                "${meal.macros.fatGrams} g",
+                                stringResource(R.string.nutrition_grams_value, meal.macros.fatGrams),
                                 MaterialTheme.colorScheme.secondary
                             )
                             MacroPill(
                                 stringResource(R.string.nutrition_macro_carbs),
-                                "${meal.macros.carbsGrams} g",
+                                stringResource(R.string.nutrition_grams_value, meal.macros.carbsGrams),
                                 MaterialTheme.colorScheme.tertiary
                             )
                         }
@@ -535,4 +586,7 @@ private fun StatChipGrid(
         }
     }
 }
+
+
+
 

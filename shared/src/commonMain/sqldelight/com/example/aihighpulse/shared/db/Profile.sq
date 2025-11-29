@@ -16,3 +16,6 @@ SELECT * FROM Profile LIMIT 1;
 upsertProfile:
 INSERT OR REPLACE INTO Profile(id, age, sex, heightCm, weightKg, goal, experienceLevel, budgetLevel)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteAllProfiles:
+DELETE FROM Profile;

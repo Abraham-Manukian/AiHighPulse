@@ -145,7 +145,7 @@ class AiService(private val llm: LLMClient) {
                 decode = { raw -> decodeBundleResponse(raw) },
                 validate = { validateBundle(it) },
                 textExtractor = { extractTextSignals(it) },
-                maxAttempts = 1
+                maxAttempts = 2
             )
             val normalized = normalizeBundle(generated, locale)
             cacheMutex.withLock {

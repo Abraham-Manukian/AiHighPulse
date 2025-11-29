@@ -77,6 +77,7 @@ class InMemoryProfileRepository : ProfileRepository {
     private var profile: Profile? = null
     override suspend fun getProfile(): Profile? = profile
     override suspend fun upsertProfile(profile: Profile) { this.profile = profile }
+    override suspend fun clearAll() { profile = null }
 }
 
 class LocalTrainingRepository : TrainingRepository {
@@ -316,7 +317,6 @@ class StubPurchasesRepository : PurchasesRepository {
 class StubSyncRepository : SyncRepository {
     override suspend fun syncAll(): Boolean = true
 }
-
 
 
 

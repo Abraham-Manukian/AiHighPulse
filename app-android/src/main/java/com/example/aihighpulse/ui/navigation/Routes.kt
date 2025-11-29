@@ -12,7 +12,16 @@ object Routes {
     const val Progress = "progress"
     const val Paywall = "paywall"
     const val Settings = "settings"
+    const val EditProfile = "edit_profile"
     const val Chat = "chat"
+
+    val bottomNavRoutes = setOf(
+        Home,
+        Workout,
+        Nutrition,
+        Sleep,
+        Progress
+    )
 }
 
 fun Routes.nutritionDetail(day: String, index: Int): String =

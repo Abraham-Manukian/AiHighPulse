@@ -234,6 +234,9 @@ object LlmRepairer {
     private fun attemptAutoRepair(raw: String): AutoRepairResult? {
         var fixed = raw.trim()
         val fixes = linkedSetOf<String>()
+        val hasBundleMarkers = fixed.contains("TRAINING_JSON") &&
+            fixed.contains("NUTRITION_JSON") &&
+            fixed.contains("SLEEP_JSON")
 
         fun applyFix(label: String, transform: (String) -> String) {
             val updated = transform(fixed)
@@ -248,7 +251,7 @@ object LlmRepairer {
 
         val firstBrace = fixed.indexOf('{')
         val lastBrace = fixed.lastIndexOf('}')
-        if (firstBrace >= 0 && lastBrace > firstBrace) {
+        if (!hasBundleMarkers && firstBrace >= 0 && lastBrace > firstBrace) {
             val candidate = fixed.substring(firstBrace, lastBrace + 1)
             if (candidate != fixed) {
                 fixed = candidate

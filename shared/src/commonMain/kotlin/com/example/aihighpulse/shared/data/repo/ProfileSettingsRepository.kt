@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 
-class ProfileSettingsRepository(
+abstract class ProfileSettingsRepository(
     private val settings: Settings,
 ) : ProfileRepository {
     private val key = "profile.json"

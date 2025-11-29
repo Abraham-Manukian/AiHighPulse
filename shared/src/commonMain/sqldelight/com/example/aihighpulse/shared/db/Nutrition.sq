@@ -54,3 +54,12 @@ FROM MealByDay b
 JOIN MealIngredient i ON i.mealId = b.mealId
 WHERE b.weekIndex = ?
 ORDER BY i.ingredient;
+
+deleteAllMealByDay:
+DELETE FROM MealByDay;
+
+deleteAllMealIngredients:
+DELETE FROM MealIngredient;
+
+deleteAllMeals:
+DELETE FROM Meal;

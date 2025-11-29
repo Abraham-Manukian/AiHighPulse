@@ -1,4 +1,4 @@
-﻿package com.example.aihighpulse.ui.screens
+package com.example.aihighpulse.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -56,14 +56,6 @@ fun SleepScreen() {
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             item {
-                Text(
-                    stringResource(R.string.sleep_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = contentColor
-                )
-            }
-            item {
                 AnimatedVisibility(
                     visible = true,
                     enter = fadeIn(tween(300)) + slideInVertically(initialOffsetY = { it / 5 }, animationSpec = tween(300))
@@ -94,7 +86,7 @@ fun SleepScreen() {
                                     ) {
                                         Text(label, style = MaterialTheme.typography.labelMedium, color = contentColor.copy(alpha = 0.7f))
                                         Text(
-                                            "${s.weeklyHours.getOrNull(index) ?: 0}h",
+                                            stringResource(R.string.sleep_hours_short, s.weeklyHours.getOrNull(index) ?: 0),
                                             style = MaterialTheme.typography.bodyMedium,
                                             fontWeight = FontWeight.SemiBold,
                                             color = contentColor
@@ -150,4 +142,3 @@ private fun sleepCardElevation() = CardDefaults.cardElevation(defaultElevation =
 
 @Composable
 private fun sleepButtonColors() = ButtonDefaults.buttonColors(containerColor = AiPalette.DeepAccent, contentColor = Color.White)
-

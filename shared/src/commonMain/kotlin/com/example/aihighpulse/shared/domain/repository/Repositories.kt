@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface ProfileRepository {
     suspend fun getProfile(): Profile?
     suspend fun upsertProfile(profile: Profile)
+    suspend fun clearAll()
 }
 
 interface TrainingRepository {

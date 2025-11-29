@@ -50,6 +50,18 @@ DELETE FROM ProfileAllergy WHERE profileId = ?;
 deleteScheduleForProfile:
 DELETE FROM ProfileSchedule WHERE profileId = ?;
 
+deleteAllEquipment:
+DELETE FROM ProfileEquipment;
+
+deleteAllDietPrefs:
+DELETE FROM ProfileDietPref;
+
+deleteAllAllergies:
+DELETE FROM ProfileAllergy;
+
+deleteAllSchedule:
+DELETE FROM ProfileSchedule;
+
 -- Selects
 selectEquipment:
 SELECT item FROM ProfileEquipment WHERE profileId = ? ORDER BY item;
@@ -62,4 +74,3 @@ SELECT allergy FROM ProfileAllergy WHERE profileId = ? ORDER BY allergy;
 
 selectSchedule:
 SELECT day, active FROM ProfileSchedule WHERE profileId = ? ORDER BY day;
-

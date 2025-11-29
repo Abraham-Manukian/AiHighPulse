@@ -1,42 +1,46 @@
-﻿package com.example.aihighpulse.ui.screens
+package com.example.aihighpulse.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,31 +49,30 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.aihighpulse.R
-import com.example.aihighpulse.core.designsystem.theme.AiGradients
+import com.example.aihighpulse.core.designsystem.components.BrandScreen
+import com.example.aihighpulse.core.designsystem.theme.AiPalette
 import com.example.aihighpulse.shared.domain.model.Goal
 import com.example.aihighpulse.shared.domain.model.Sex
+import com.example.aihighpulse.ui.vm.ONBOARDING_TOTAL_STEPS
 import com.example.aihighpulse.ui.vm.OnboardingViewModel
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(onDone: () -> Unit) {
     val vm: OnboardingViewModel = koinViewModel()
     val s by vm.state.collectAsState()
 
-    val mounted = remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { mounted.value = true }
-
     val equipmentOptions = listOf(
-        "Гантели",
-        "Штанга",
-        "Турник",
-        "Скакалка",
-        "Эспандеры",
-        "Коврик",
-        "Петли TRX",
-        "Беговая дорожка",
-        "Велотренажёр"
+        stringResource(R.string.equipment_dumbbells),
+        stringResource(R.string.equipment_barbell),
+        stringResource(R.string.equipment_kettlebell),
+        stringResource(R.string.equipment_bands),
+        stringResource(R.string.equipment_bench),
+        stringResource(R.string.equipment_pullup_bar),
+        stringResource(R.string.equipment_trx),
+        stringResource(R.string.equipment_mat),
+        stringResource(R.string.equipment_cardio)
     )
 
     val dayLabels = listOf(
@@ -82,175 +85,321 @@ fun OnboardingScreen(onDone: () -> Unit) {
         "Sun" to stringResource(R.string.day_sun_short)
     )
 
-    Column(
+    val languageOptions = listOf(
+        "system" to stringResource(R.string.settings_language_system),
+        "en-US" to stringResource(R.string.language_en),
+        "ru-RU" to stringResource(R.string.language_ru)
+    )
+    val glassBg = Color.White.copy(alpha = 0.18f)
+    val glassBorder = Color.White.copy(alpha = 0.35f)
+    val inputColors = TextFieldDefaults.outlinedTextFieldColors(
+        focusedBorderColor = glassBorder,
+        unfocusedBorderColor = glassBorder.copy(alpha = 0.6f),
+        cursorColor = Color.White,
+        focusedLabelColor = Color.White,
+        unfocusedLabelColor = Color.White.copy(alpha = 0.85f),
+        focusedTextColor = Color.White,
+        unfocusedTextColor = Color.White,
+        disabledTextColor = Color.White.copy(alpha = 0.6f),
+        focusedPlaceholderColor = Color.White.copy(alpha = 0.7f),
+        unfocusedPlaceholderColor = Color.White.copy(alpha = 0.7f)
+    )
+
+    val progress = (s.currentStep + 1).toFloat() / ONBOARDING_TOTAL_STEPS.toFloat()
+    val isLastStep = s.currentStep >= ONBOARDING_TOTAL_STEPS - 1
+
+    BrandScreen(
         modifier = Modifier
             .fillMaxSize()
-            .background(AiGradients.purpleWave())
             .statusBarsPadding()
-            .navigationBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(stringResource(R.string.onboard_title), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = Color.White)
-        Text(stringResource(R.string.onboard_subtitle), color = Color.White.copy(alpha = 0.85f))
-
-        val languageOptions = listOf(
-            "system" to stringResource(R.string.settings_language_system),
-            "en-US" to stringResource(R.string.language_en),
-            "ru-RU" to stringResource(R.string.language_ru)
-        )
-        AnimatedVisibility(
-            visible = mounted.value,
-            enter = fadeIn(animationSpec = tween(350)) + slideInVertically(initialOffsetY = { it / 4 }, animationSpec = tween(350, easing = FastOutSlowInEasing))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(stringResource(R.string.label_language), style = MaterialTheme.typography.titleMedium)
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        languageOptions.forEach { (tag, label) ->
-                            FilterChip(
-                                selected = s.languageTag == tag,
-                                onClick = { vm.setLanguage(tag) },
-                                label = { Text(label) }
-                            )
-                        }
-                    }
-                }
+            Text(
+                stringResource(R.string.onboard_title),
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Text(stringResource(R.string.onboard_subtitle), color = Color.White.copy(alpha = 0.85f))
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = stringResource(R.string.onboard_step_counter, s.currentStep + 1, ONBOARDING_TOTAL_STEPS),
+                    color = Color.White.copy(alpha = 0.8f),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                LinearProgressIndicator(
+                    progress = progress,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(10.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    trackColor = Color.White.copy(alpha = 0.15f),
+                    color = AiPalette.DeepAccent
+                )
             }
-        }
 
-        AnimatedVisibility(
-            visible = mounted.value,
-            enter = fadeIn(animationSpec = tween(450, delayMillis = 120)) + slideInVertically(initialOffsetY = { it / 3 }, animationSpec = tween(450, easing = FastOutSlowInEasing))
-        ) {
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        OutlinedTextField(
-                            value = s.age,
-                            onValueChange = { v -> vm.update { st -> st.copy(age = v.filter { it.isDigit() }.take(2)) } },
-                            label = { Text(stringResource(R.string.label_age)) },
-                            modifier = Modifier.weight(1f)
-                        )
-                        OutlinedTextField(
-                            value = s.heightCm,
-                            onValueChange = { v -> vm.update { st -> st.copy(heightCm = v.filter { it.isDigit() }.take(3)) } },
-                            label = { Text(stringResource(R.string.label_height_cm)) },
-                            modifier = Modifier.weight(1f)
-                        )
-                        OutlinedTextField(
-                            value = s.weightKg,
-                            onValueChange = { v -> vm.update { st -> st.copy(weightKg = v.filter { it.isDigit() || it == '.' }.take(5)) } },
-                            label = { Text(stringResource(R.string.label_weight_kg)) },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    Text(stringResource(R.string.label_sex))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val items = listOf(
-                            Sex.MALE to stringResource(R.string.sex_male),
-                            Sex.FEMALE to stringResource(R.string.sex_female),
-                            Sex.OTHER to stringResource(R.string.sex_other)
-                        )
-                        items.forEach { (value, label) ->
-                            FilterChip(selected = s.sex == value, onClick = { vm.update { it.copy(sex = value) } }, label = { Text(label) })
+            Crossfade(targetState = s.currentStep, label = "onboarding_steps") { step ->
+                when (step) {
+                    0 -> StepCard {
+                        Text(stringResource(R.string.label_language), style = MaterialTheme.typography.titleMedium, color = Color.White)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            languageOptions.forEach { (tag, label) ->
+                                FilterChip(
+                                    selected = s.languageTag == tag,
+                                    onClick = { vm.setLanguage(tag) },
+                                    label = { Text(label) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = glassBg,
+                                        selectedLabelColor = Color.White,
+                                        containerColor = glassBg.copy(alpha = 0.12f),
+                                        labelColor = Color.White
+                                    ),
+                                    border = null
+                                )
+                            }
                         }
                     }
-
-                    Text(stringResource(R.string.label_goal))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val items = listOf(
-                            Goal.LOSE_FAT to stringResource(R.string.goal_lose_fat),
-                            Goal.MAINTAIN to stringResource(R.string.goal_maintain),
-                            Goal.GAIN_MUSCLE to stringResource(R.string.goal_gain_muscle)
-                        )
-                        items.forEach { (value, label) ->
-                            FilterChip(selected = s.goal == value, onClick = { vm.update { it.copy(goal = value) } }, label = { Text(label) })
-                        }
-                    }
-
-                    Text(stringResource(R.string.label_experience, s.experienceLevel))
-                    Slider(
-                        value = s.experienceLevel.toFloat(),
-                        onValueChange = { v -> vm.update { st -> st.copy(experienceLevel = v.toInt().coerceIn(1, 5)) } },
-                        valueRange = 1f..5f,
-                        steps = 3
-                    )
-
-                    Text(stringResource(R.string.label_equipment_presets))
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        equipmentOptions.forEach { name ->
-                            val selected = name in s.selectedEquipment
-                            FilterChip(
-                                selected = selected,
-                                onClick = { vm.toggleEquipment(name) },
-                                label = { Text(name) }
+                    1 -> StepCard {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            OutlinedTextField(
+                                value = s.age,
+                                onValueChange = { v -> vm.update { st -> st.copy(age = v.filter { it.isDigit() }.take(2)) } },
+                                label = { Text(stringResource(R.string.label_age)) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(glassBg),
+                                colors = inputColors
+                            )
+                            OutlinedTextField(
+                                value = s.heightCm,
+                                onValueChange = { v -> vm.update { st -> st.copy(heightCm = v.filter { it.isDigit() }.take(3)) } },
+                                label = { Text(stringResource(R.string.label_height_cm)) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(glassBg),
+                                colors = inputColors
+                            )
+                            OutlinedTextField(
+                                value = s.weightKg,
+                                onValueChange = { v -> vm.update { st -> st.copy(weightKg = v.filter { it.isDigit() || it == '.' }.take(5)) } },
+                                label = { Text(stringResource(R.string.label_weight_kg)) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(glassBg),
+                                colors = inputColors
                             )
                         }
+
+                        Text(stringResource(R.string.label_sex), color = Color.White)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            listOf(Sex.MALE, Sex.FEMALE, Sex.OTHER).forEach { option ->
+                                val label = when (option) {
+                                    Sex.MALE -> stringResource(R.string.sex_male)
+                                    Sex.FEMALE -> stringResource(R.string.sex_female)
+                                    Sex.OTHER -> stringResource(R.string.sex_other)
+                                }
+                                FilterChip(
+                                    selected = s.sex == option,
+                                    onClick = { vm.update { it.copy(sex = option) } },
+                                    label = { Text(label) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = glassBg,
+                                        selectedLabelColor = Color.White,
+                                        containerColor = glassBg.copy(alpha = 0.12f),
+                                        labelColor = Color.White
+                                    ),
+                                    border = null
+                                )
+                            }
+                        }
                     }
-
-                    OutlinedTextField(
-                        value = s.customEquipment,
-                        onValueChange = vm::setCustomEquipment,
-                        label = { Text(stringResource(R.string.label_equipment_manual)) },
-                        placeholder = { Text(stringResource(R.string.placeholder_equipment_manual)) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                    2 -> StepCard {
+                        Text(stringResource(R.string.label_goal), style = MaterialTheme.typography.titleMedium, color = Color.White)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Goal.values().forEach { goal ->
+                                val label = when (goal) {
+                                    Goal.LOSE_FAT -> stringResource(R.string.goal_lose_fat)
+                                    Goal.MAINTAIN -> stringResource(R.string.goal_maintain)
+                                    Goal.GAIN_MUSCLE -> stringResource(R.string.goal_gain_muscle)
+                                }
+                                FilterChip(
+                                    selected = s.goal == goal,
+                                    onClick = { vm.update { it.copy(goal = goal) } },
+                                    label = { Text(label) },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = glassBg,
+                                        selectedLabelColor = Color.White,
+                                        containerColor = glassBg.copy(alpha = 0.12f),
+                                        labelColor = Color.White
+                                    ),
+                                    border = null
+                                )
+                            }
+                        }
+                        Text(stringResource(R.string.label_experience, s.experienceLevel), color = Color.White)
+                        Slider(
+                            value = s.experienceLevel.toFloat(),
+                            onValueChange = { lvl -> vm.update { it.copy(experienceLevel = lvl.toInt().coerceIn(1, 5)) } },
+                            valueRange = 1f..5f,
+                            steps = 3
+                        )
+                    }
+                    3 -> StepCard {
+                        Text(stringResource(R.string.label_equipment_presets), style = MaterialTheme.typography.titleMedium, color = Color.White)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            equipmentOptions.forEach { option ->
+                                ChipToggle(
+                                    label = option,
+                                    selected = s.selectedEquipment.contains(option),
+                                    onClick = { vm.toggleEquipment(option) }
+                                )
+                            }
+                        }
+                        OutlinedTextField(
+                            value = s.customEquipment,
+                            onValueChange = { vm.setCustomEquipment(it) },
+                            label = { Text(stringResource(R.string.label_equipment_manual)) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(glassBg),
+                            colors = inputColors
+                        )
+                    }
+                    4 -> StepCard {
+                        Text(stringResource(R.string.label_dietary_prefs), color = Color.White)
                         OutlinedTextField(
                             value = s.dietaryPreferences,
-                            onValueChange = { v -> vm.update { st -> st.copy(dietaryPreferences = v.take(120)) } },
+                            onValueChange = { vm.update { st -> st.copy(dietaryPreferences = it) } },
                             label = { Text(stringResource(R.string.label_dietary_prefs)) },
-                            placeholder = { Text(stringResource(R.string.placeholder_dietary_prefs)) },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(glassBg),
+                            colors = inputColors
                         )
                         OutlinedTextField(
                             value = s.allergies,
-                            onValueChange = { v -> vm.update { st -> st.copy(allergies = v.take(120)) } },
+                            onValueChange = { vm.update { st -> st.copy(allergies = it) } },
                             label = { Text(stringResource(R.string.label_allergies)) },
-                            placeholder = { Text(stringResource(R.string.placeholder_allergies)) },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(glassBg),
+                            colors = inputColors
                         )
                     }
-
-                    Text(stringResource(R.string.label_weekdays))
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        dayLabels.forEach { (key, label) ->
-                            val checked = s.days[key] == true
-                            Box(
-                                modifier = Modifier
-                                    .clip(MaterialTheme.shapes.small)
-                                    .border(1.dp, MaterialTheme.colorScheme.outline, MaterialTheme.shapes.small)
-                                    .background(if (checked) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent)
-                                    .clickable { vm.update { it.copy(days = it.days + (key to !checked)) } }
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                            ) { Text(label) }
+                    else -> StepCard {
+                        Text(stringResource(R.string.label_weekdays), style = MaterialTheme.typography.titleMedium, color = Color.White)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            dayLabels.forEach { (day, label) ->
+                                val selected = s.days[day] == true
+                                ChipToggle(
+                                    label = label,
+                                    selected = selected,
+                                    onClick = { vm.update { st -> st.copy(days = st.days + (day to !selected)) } }
+                                )
+                            }
                         }
                     }
                 }
             }
-        }
 
-        if (s.error != null) Text(stringResource(R.string.error_invalid_input), color = MaterialTheme.colorScheme.error)
-        Button(enabled = !s.saving, onClick = { vm.save(onSuccess = onDone) }, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.save_and_continue))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (s.currentStep > 0) {
+                    OutlinedButton(
+                        onClick = { vm.prevStep() },
+                        enabled = !s.saving,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Color.White.copy(alpha = 0.08f),
+                            contentColor = Color.White
+                        ),
+                        border = BorderStroke(1.dp, glassBorder)
+                    ) { Text(stringResource(R.string.action_back)) }
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+                Button(
+                    onClick = {
+                        if (isLastStep) vm.save(onDone) else vm.nextStep()
+                    },
+                    modifier = Modifier.weight(1f),
+                    enabled = !s.saving,
+                    shape = MaterialTheme.shapes.large,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AiPalette.DeepAccent,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(if (isLastStep) stringResource(R.string.onboard_cta) else stringResource(R.string.action_next))
+                }
+            }
+
+            if (s.saving) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(22.dp), color = Color.White)
+                    Text(text = stringResource(R.string.settings_saving), color = Color.White.copy(alpha = 0.85f))
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun FeatureRow(title: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier
-                .size(12.dp)
-                .clip(MaterialTheme.shapes.small)
-                .background(MaterialTheme.colorScheme.primary)
-        )
-        Spacer(Modifier.size(12.dp))
-        Text(title, style = MaterialTheme.typography.bodyMedium)
+private fun StepCard(content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        colors = onboardingCardColors(),
+        elevation = onboardingCardElevation(),
+        shape = MaterialTheme.shapes.extraLarge,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            content()
+        }
     }
 }
+
+@Composable
+private fun ChipToggle(label: String, selected: Boolean, onClick: () -> Unit) {
+    val background = if (selected) Color.White.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.06f)
+    val borderColor = Color.White.copy(alpha = if (selected) 0.55f else 0.2f)
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(background)
+            .border(1.dp, borderColor, CircleShape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(label, color = Color.White, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun onboardingCardColors() = CardDefaults.cardColors(
+    containerColor = Color.White.copy(alpha = 0.14f),
+    contentColor = Color.White
+)
+
+@Composable
+private fun onboardingCardElevation() = CardDefaults.cardElevation(defaultElevation = 0.dp)

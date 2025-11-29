@@ -20,8 +20,19 @@ class SettingsViewModel(
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state.asStateFlow()
 
-    init {
+    init { refresh() }
+
+    fun refresh() {
         viewModelScope.launch { _state.value = SettingsState(profileRepository.getProfile()) }
+    }
+
+    fun reset(onDone: () -> Unit) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(saving = true)
+            profileRepository.clearAll()
+            _state.value = SettingsState(profile = null, saving = false)
+            onDone()
+        }
     }
 
     fun save(profile: Profile) {
