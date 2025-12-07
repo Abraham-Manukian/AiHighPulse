@@ -60,6 +60,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -72,6 +73,10 @@ import com.example.aihighpulse.ui.vm.WorkoutViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.math.roundToInt
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
+import kotlinx.datetime.toJavaLocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,6 +84,8 @@ fun WorkoutScreen() {
     val vm: WorkoutViewModel = koinViewModel()
     val s by vm.state.collectAsState()
     val showAddSheet = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val locale: Locale = context.resources.configuration.locales[0] ?: Locale.getDefault()
 
     BrandScreen(Modifier.fillMaxSize()) {
         Scaffold(
@@ -118,11 +125,13 @@ fun WorkoutScreen() {
                                 border = if (selected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)) else null
                             ) {
                                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                    val leadExercise = w.sets.firstOrNull()?.exerciseId ?: "Session"
+                                    val leadExerciseId = w.sets.firstOrNull()?.exerciseId ?: "Session"
+                                    val leadExercise = exerciseLabel(leadExerciseId, locale)
+                                    val dateLabel = formatDate(w.date, locale)
                                     val progress = if (w.sets.isNotEmpty()) feedback.completedSets.size / w.sets.size.toFloat() else 0f
                                     WorkoutCardHeader(
                                         title = leadExercise,
-                                        date = w.date.toString(),
+                                        date = dateLabel,
                                         setsCount = w.sets.size,
                                         completed = feedback.completedSets.size,
                                         progress = progress
@@ -159,8 +168,9 @@ fun WorkoutScreen() {
                                                     .padding(start = 12.dp),
                                                 verticalArrangement = Arrangement.spacedBy(4.dp)
                                             ) {
+                                                val exerciseName = exerciseLabel(set.exerciseId, locale)
                                                 Text(
-                                                    set.exerciseId,
+                                                    exerciseName,
                                                     style = MaterialTheme.typography.bodyLarge,
                                                     fontWeight = FontWeight.SemiBold,
                                                     maxLines = 1,
@@ -372,6 +382,21 @@ private fun WorkoutCardHeader(
             )
         }
     }
+}
+
+private fun exerciseLabel(exerciseId: String, locale: Locale): String {
+    // Only prettify the id coming from LLM; do not force a static dictionary because exercises are dynamic.
+    return prettifyExerciseId(exerciseId, locale)
+}
+
+private fun prettifyExerciseId(exerciseId: String, locale: Locale): String =
+    exerciseId.replace('_', ' ').replaceFirstChar { ch ->
+        if (ch.isLowerCase()) ch.titlecase(locale) else ch.toString()
+    }
+
+private fun formatDate(date: kotlinx.datetime.LocalDate, locale: Locale): String {
+    val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
+    return date.toJavaLocalDate().format(formatter)
 }
 
 @Composable

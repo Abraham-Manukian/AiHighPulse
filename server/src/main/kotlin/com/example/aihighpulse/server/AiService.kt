@@ -4,8 +4,10 @@ import com.example.aihighpulse.server.llm.LLMClient
 import com.example.aihighpulse.server.llm.LlmRepairer
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneOffset
+import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.buildList
@@ -530,10 +532,13 @@ private fun looksLikeCp1251Garbage(raw: String): Boolean =
             ch.code in 0x00C0..0x00FF
     }
 
-internal fun normalizeTrainingPlan(plan: AiTrainingResponse): AiTrainingResponse =
-    plan.copy(
-        workouts = plan.workouts.map { workout ->
+internal fun normalizeTrainingPlan(plan: AiTrainingResponse): AiTrainingResponse {
+    val weekStart = expectedWeekStart(plan.weekIndex)
+    return plan.copy(
+        workouts = plan.workouts.mapIndexed { index, workout ->
+            val safeDate = normalizeWorkoutDate(workout.date, weekStart, index)
             workout.copy(
+                date = safeDate,
                 id = sanitizeText(workout.id).ifEmpty { workout.id },
                 sets = workout.sets.map { set ->
                     val trimmedId = sanitizeText(set.exerciseId).ifEmpty { set.exerciseId }
@@ -548,6 +553,7 @@ internal fun normalizeTrainingPlan(plan: AiTrainingResponse): AiTrainingResponse
             )
         }
     )
+}
 
 internal fun normalizeNutritionPlan(plan: AiNutritionResponse, locale: Locale): AiNutritionResponse {
     val fallbackMeals = templateMeals(locale)
@@ -686,6 +692,23 @@ internal fun templateMeals(locale: Locale): List<AiMeal> {
             )
         )
     }
+}
+
+private fun expectedWeekStart(weekIndex: Int): LocalDate {
+    val today = LocalDate.now(ZoneOffset.UTC)
+    val nextMonday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY))
+    return nextMonday.plusWeeks(weekIndex.toLong())
+}
+
+private fun normalizeWorkoutDate(raw: String, weekStart: LocalDate, index: Int): String {
+    val parsed = runCatching { LocalDate.parse(raw) }.getOrElse { weekStart.plusDays(index.toLong()) }
+    val weekEnd = weekStart.plusDays(6)
+    val safeDate = if (parsed.isBefore(weekStart) || parsed.isAfter(weekEnd)) {
+        weekStart.plusDays(index.toLong().coerceAtMost(6))
+    } else {
+        parsed
+    }
+    return safeDate.toString()
 }
 
 internal fun validateTrainingPlan(plan: AiTrainingResponse): String? {
