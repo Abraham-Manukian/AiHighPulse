@@ -23,7 +23,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.SerializationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.CancellationException
-import java.io.IOException
+import io.ktor.utils.io.errors.IOException
 
 private const val DEFAULT_REQUEST_TIMEOUT_MS = 30_000L
 private const val DEFAULT_SOCKET_TIMEOUT_MS = 30_000L
