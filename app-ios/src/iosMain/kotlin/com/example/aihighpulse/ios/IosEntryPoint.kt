@@ -8,7 +8,10 @@ import platform.UIKit.UIViewController
  * Xcode будет вызывать эту функцию, чтобы получить root UIViewController.
  */
 fun MainViewController(): UIViewController {
-    return ComposeUIViewController {
+    initKoinIfNeeded()
+    return ComposeUIViewController(
+        configure = { enforceStrictPlistSanityCheck = false }
+    ) {
         AppIosRoot()
     }
 }

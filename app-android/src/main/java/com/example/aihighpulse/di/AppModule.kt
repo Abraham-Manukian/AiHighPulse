@@ -2,7 +2,15 @@ package com.example.aihighpulse.di
 
 import com.example.aihighpulse.billing.AndroidPurchasesRepository
 import com.example.aihighpulse.shared.domain.repository.PurchasesRepository
-import com.example.aihighpulse.ui.vm.*
+import com.example.aihighpulse.ui.vm.ChatViewModel
+import com.example.aihighpulse.ui.vm.HomeViewModel
+import com.example.aihighpulse.ui.vm.NutritionViewModel
+import com.example.aihighpulse.ui.vm.OnboardingViewModel
+import com.example.aihighpulse.ui.vm.PaywallViewModel
+import com.example.aihighpulse.ui.vm.ProgressViewModel
+import com.example.aihighpulse.ui.vm.SettingsViewModel
+import com.example.aihighpulse.ui.vm.SleepViewModel
+import com.example.aihighpulse.ui.vm.WorkoutViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -16,11 +24,10 @@ object AppModule {
         single<PurchasesRepository> { AndroidPurchasesRepository(androidContext()) }
 
         // SQLDelight database
-        // Bump DB name to recreate schema including new tables (dev only). TODO: add proper migrations.
         single<SqlDriver> { AndroidSqliteDriver(AppDatabase.Schema, androidContext(), "app_v2.db") }
         single { AppDatabase(get()) }
 
-        // ViewModels
+        // ViewModels (Android implementations live in :ui)
         viewModel { OnboardingViewModel(get(), get(), get()) }
         viewModel { HomeViewModel(get(), get()) }
         viewModel { WorkoutViewModel(get(), get(), get()) }
@@ -28,9 +35,7 @@ object AppModule {
         viewModel { SleepViewModel(get(), get()) }
         viewModel { ProgressViewModel(get()) }
         viewModel { PaywallViewModel(get()) }
-        viewModel { SettingsViewModel(get()) }
-        viewModel { com.example.aihighpulse.ui.vm.ChatViewModel(get()) }
+        viewModel { SettingsViewModel(get(), get()) }
+        viewModel { ChatViewModel(get()) }
     }
 }
-
-

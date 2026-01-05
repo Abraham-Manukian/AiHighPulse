@@ -41,7 +41,7 @@ android {
 
 dependencies {
     implementation(project(":shared"))
-    implementation(project(":core-designsystem"))
+    implementation(project(":ui"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -52,16 +52,9 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.compose.material3)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.navigation.compose)
-    // Icons for prettier navigation
-    implementation("androidx.compose.material:material-icons-extended:1.7.1")
-    // Lifecycle / ViewModel for MVVM
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
 
     // DI
     implementation(libs.koin.android)
-    implementation("io.insert-koin:koin-androidx-compose:3.5.6")
 
     // SQLDelight driver (for creating driver in Android app)
     implementation(libs.sqldelight.driver.android)
@@ -69,4 +62,3 @@ dependencies {
     // Billing
     implementation(libs.play.billing)
 }
-

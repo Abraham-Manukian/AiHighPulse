@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		407E392B2EF1D85000D78F3F /* AppIos.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 407E392A2EF1D85000D78F3F /* AppIos.xcframework */; };
 		407E392C2EF1D85000D78F3F /* AppIos.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 407E392A2EF1D85000D78F3F /* AppIos.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		40D2A1AB2F0A000100ABCD02 /* compose-resources in Resources */ = {isa = PBXBuildFile; fileRef = 40D2A1AA2F0A000100ABCD01 /* compose-resources */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,7 @@
 		401127A92EE7611E00FDCDE6 /* VtempeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VtempeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		401127B32EE7611E00FDCDE6 /* VtempeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VtempeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		407E392A2EF1D85000D78F3F /* AppIos.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = AppIos.xcframework; path = "../../app-ios/build/XCFrameworks/debug/AppIos.xcframework"; sourceTree = "<group>"; };
+		40D2A1AA2F0A000100ABCD01 /* compose-resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "compose-resources"; path = "../../app-ios/build/compose-resources"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -118,6 +120,7 @@
 			isa = PBXGroup;
 			children = (
 				407E392A2EF1D85000D78F3F /* AppIos.xcframework */,
+				40D2A1AA2F0A000100ABCD01 /* compose-resources */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -130,6 +133,7 @@
 			buildConfigurationList = 401127BD2EE7611E00FDCDE6 /* Build configuration list for PBXNativeTarget "Vtempe" */;
 			buildPhases = (
 				401127982EE7611D00FDCDE6 /* Sources */,
+				40D2A1AC2F0A000100ABCD03 /* Build Kotlin (XCFramework + Resources) */,
 				401127992EE7611D00FDCDE6 /* Frameworks */,
 				4011279A2EE7611D00FDCDE6 /* Resources */,
 				40C3A4512EE89E8400FE369C /* Embed Frameworks */,
@@ -243,6 +247,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40D2A1AB2F0A000100ABCD02 /* compose-resources in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,6 +266,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		40D2A1AC2F0A000100ABCD03 /* Build Kotlin (XCFramework + Resources) */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build Kotlin (XCFramework + Resources)";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -eu; set -x; ROOT=$(cd \"$SRCROOT/../..\" && pwd); GRADLEW=\"$ROOT/gradlew\"; if [ -z \"${JAVA_HOME:-}\" ]; then JAVA_HOME=$(/usr/libexec/java_home -v 17 2>/dev/null || true); export JAVA_HOME; fi; if [ ! -x \"$GRADLEW\" ]; then chmod +x \"$GRADLEW\"; fi; CONFIG=\"${CONFIGURATION:-Debug}\"; TASK=\":app-ios:assembleAppIos${CONFIG}XCFramework\"; cd \"$ROOT\"; \"$GRADLEW\" --no-daemon \"$TASK\" :app-ios:prepareComposeResourcesForXcode;";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		401127982EE7611D00FDCDE6 /* Sources */ = {
@@ -337,7 +360,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -398,7 +421,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -425,14 +448,18 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = NO;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = NO;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_API_BASE_URL[sdk=iphoneos*]" = "http://localhost:8081";
+				"INFOPLIST_KEY_API_BASE_URL[sdk=iphonesimulator*]" = "http://localhost:8081";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
@@ -467,14 +494,18 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
-				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = NO;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = NO;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_API_BASE_URL[sdk=iphoneos*]" = "https://api.example.com";
+				"INFOPLIST_KEY_API_BASE_URL[sdk=iphonesimulator*]" = "https://api.example.com";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
