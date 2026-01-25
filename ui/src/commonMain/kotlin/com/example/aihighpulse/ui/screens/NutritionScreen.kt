@@ -102,116 +102,33 @@ fun NutritionScreen(
     BrandScreen(Modifier.fillMaxSize()) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val isCompactWidth = maxWidth < 360.dp
-            Column(Modifier.fillMaxSize()) {
-                // Добавляем отступ сверху для "парящего" топ бара
-                Spacer(Modifier.height(topBarHeight))
-                
-                if (isCompactWidth) {
-                    FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp, start = 20.dp, end = 20.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        maxItemsInEachRow = 4
-                    ) {
-                        dayOptions.forEach { key ->
-                            DayChip(
-                                label = dayLabels[key] ?: key,
-                                selected = state.selectedDay == key,
-                                onClick = { presenter.selectDay(key) }
-                            )
-                        }
-                    }
-                } else {
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(horizontal = 20.dp)
-                    ) {
-                        items(dayOptions.size) { index ->
-                            val key = dayOptions[index]
-                            DayChip(
-                                label = dayLabels[key] ?: key,
-                                selected = state.selectedDay == key,
-                                onClick = { presenter.selectDay(key) }
-                            )
-                        }
-                    }
-                }
-                TabRow(
-                    selectedTabIndex = tab,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
-                    containerColor = Color.Transparent,
-                    contentColor = Color.White,
-                    indicator = { positions ->
-                        if (positions.isNotEmpty()) {
-                            TabRowDefaults.Indicator(
-                                modifier = Modifier
-                                    .tabIndicatorOffset(positions[tab])
-                                    .padding(horizontal = 24.dp)
-                                    .clip(RoundedCornerShape(50))
-                                    .height(3.dp),
-                                color = Color.White.copy(alpha = 0.95f)
-                            )
-                        }
-                    },
-                    divider = {}
-                ) {
-                    Tab(
-                        selected = tab == 0,
-                        onClick = { tab = 0 },
-                        text = {
-                            Text(
-                                stringResource(Res.string.nutrition_tab_menu),
-                                color = if (tab == 0) Color.White else Color.White.copy(alpha = 0.7f),
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
+            
+            Crossfade(targetState = state.ui, label = "nutrition-ui", modifier = Modifier.fillMaxSize()) { uiState ->
+                when (uiState) {
+                    UiState.Loading -> PlaceholderScreen(
+                        title = stringResource(Res.string.nutrition_loading_title),
+                        sections = listOf(":")
                     )
-                    Tab(
-                        selected = tab == 1,
-                        onClick = { tab = 1 },
-                        text = {
-                            Text(
-                                stringResource(Res.string.nutrition_tab_shopping),
-                                color = if (tab == 1) Color.White else Color.White.copy(alpha = 0.7f),
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
+
+                    is UiState.Error -> PlaceholderScreen(
+                        title = stringResource(Res.string.nutrition_error_title),
+                        sections = listOf(stringResource(Res.string.nutrition_error_hint))
                     )
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f) // Используем weight чтобы контент занимал оставшееся место
-                ) {
-                    Crossfade(targetState = state.ui, label = "nutrition-ui") { uiState ->
-                        when (uiState) {
-                            UiState.Loading -> PlaceholderScreen(
-                                title = stringResource(Res.string.nutrition_loading_title),
-                                sections = listOf(":")
-                            )
 
-                            is UiState.Error -> PlaceholderScreen(
-                                title = stringResource(Res.string.nutrition_error_title),
-                                sections = listOf(stringResource(Res.string.nutrition_error_hint))
-                            )
-
-                            is UiState.Data -> NutritionContent(
-                                tab = tab,
-                                plan = uiState.value,
-                                selectedDay = state.selectedDay,
-                                contentColor = contentColor,
-                                onOpenMeal = onOpenMeal,
-                                bottomPadding = bottomBarHeight
-                            )
-                        }
-                    }
+                    is UiState.Data -> NutritionContent(
+                        tab = tab,
+                        onTabSelect = { tab = it },
+                        plan = uiState.value,
+                        selectedDay = state.selectedDay,
+                        onDaySelect = { presenter.selectDay(it) },
+                        dayOptions = dayOptions,
+                        dayLabels = dayLabels,
+                        contentColor = contentColor,
+                        onOpenMeal = onOpenMeal,
+                        topPadding = topBarHeight,
+                        bottomPadding = bottomBarHeight,
+                        isCompactWidth = isCompactWidth
+                    )
                 }
             }
         }
@@ -221,24 +138,127 @@ fun NutritionScreen(
 @Composable
 private fun NutritionContent(
     tab: Int,
+    onTabSelect: (Int) -> Unit,
     plan: NutritionPlan,
     selectedDay: String,
+    onDaySelect: (String) -> Unit,
+    dayOptions: List<String>,
+    dayLabels: Map<String, String>,
     contentColor: Color,
     onOpenMeal: (day: String, index: Int) -> Unit,
-    bottomPadding: Dp = 0.dp
+    topPadding: Dp,
+    bottomPadding: Dp,
+    isCompactWidth: Boolean
 ) {
-    if (tab == 1) {
-        val items = plan.shoppingList
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = 20.dp,
-                end = 20.dp, 
-                top = 12.dp, 
-                bottom = bottomPadding + 32.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+    val dayMeals = plan.mealsByDay[selectedDay].orEmpty()
+    val proteinDay = dayMeals.sumOf { it.macros.proteinGrams }
+    val fatDay = dayMeals.sumOf { it.macros.fatGrams }
+    val carbsDay = dayMeals.sumOf { it.macros.carbsGrams }
+    val kcalDay = dayMeals.sumOf { it.macros.kcal }
+    val allMeals = plan.mealsByDay.values.flatten()
+    val proteinWeek = allMeals.sumOf { it.macros.proteinGrams }
+    val fatWeek = allMeals.sumOf { it.macros.fatGrams }
+    val carbsWeek = allMeals.sumOf { it.macros.carbsGrams }
+    val kcalWeek = allMeals.sumOf { it.macros.kcal }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            top = topPadding,
+            bottom = bottomPadding + 32.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(0.dp) // Spacing handled inside items for the headers
+    ) {
+        // --- Дни недели (Hide when scrolling) ---
+        item {
+            if (isCompactWidth) {
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp, start = 20.dp, end = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    maxItemsInEachRow = 4
+                ) {
+                    dayOptions.forEach { key ->
+                        DayChip(
+                            label = dayLabels[key] ?: key,
+                            selected = selectedDay == key,
+                            onClick = { onDaySelect(key) }
+                        )
+                    }
+                }
+            } else {
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(horizontal = 20.dp)
+                ) {
+                    items(dayOptions.size) { index ->
+                        val key = dayOptions[index]
+                        DayChip(
+                            label = dayLabels[key] ?: key,
+                            selected = selectedDay == key,
+                            onClick = { onDaySelect(key) }
+                        )
+                    }
+                }
+            }
+        }
+
+        // --- Tabs (Hide when scrolling) ---
+        item {
+            TabRow(
+                selectedTabIndex = tab,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                containerColor = Color.Transparent,
+                contentColor = Color.White,
+                indicator = { positions ->
+                    if (positions.isNotEmpty()) {
+                        TabRowDefaults.Indicator(
+                            modifier = Modifier
+                                .tabIndicatorOffset(positions[tab])
+                                .padding(horizontal = 24.dp)
+                                .clip(RoundedCornerShape(50))
+                                .height(3.dp),
+                            color = Color.White.copy(alpha = 0.95f)
+                        )
+                    }
+                },
+                divider = {}
+            ) {
+                Tab(
+                    selected = tab == 0,
+                    onClick = { onTabSelect(0) },
+                    text = {
+                        Text(
+                            stringResource(Res.string.nutrition_tab_menu),
+                            color = if (tab == 0) Color.White else Color.White.copy(alpha = 0.7f),
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                )
+                Tab(
+                    selected = tab == 1,
+                    onClick = { onTabSelect(1) },
+                    text = {
+                        Text(
+                            stringResource(Res.string.nutrition_tab_shopping),
+                            color = if (tab == 1) Color.White else Color.White.copy(alpha = 0.7f),
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                )
+            }
+        }
+
+        if (tab == 1) {
+            val items = plan.shoppingList
+            item { Spacer(Modifier.height(12.dp)) }
             item {
                 AnimatedVisibility(
                     visible = true,
@@ -250,7 +270,7 @@ private fun NutritionContent(
                     val bulletColor = AiPalette.Primary
                     val textColor = Color(0xFF2D2D2D)
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                         colors = nutritionCardColors(),
                         elevation = nutritionCardElevation(),
                         shape = MaterialTheme.shapes.extraLarge
@@ -296,120 +316,47 @@ private fun NutritionContent(
                     }
                 }
             }
-        }
-        return
-    }
-
-    val dayMeals = plan.mealsByDay[selectedDay].orEmpty()
-    val proteinDay = dayMeals.sumOf { it.macros.proteinGrams }
-    val fatDay = dayMeals.sumOf { it.macros.fatGrams }
-    val carbsDay = dayMeals.sumOf { it.macros.carbsGrams }
-    val kcalDay = dayMeals.sumOf { it.macros.kcal }
-    val allMeals = plan.mealsByDay.values.flatten()
-    val proteinWeek = allMeals.sumOf { it.macros.proteinGrams }
-    val fatWeek = allMeals.sumOf { it.macros.fatGrams }
-    val carbsWeek = allMeals.sumOf { it.macros.carbsGrams }
-    val kcalWeek = allMeals.sumOf { it.macros.kcal }
-
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = 20.dp,
-            end = 20.dp, 
-            top = 12.dp, 
-            bottom = bottomPadding + 32.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        item {
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(tween(300)) + slideInVertically(
-                    initialOffsetY = { it / 6 },
-                    animationSpec = tween(300)
-                )
-            ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = nutritionCardColors(),
-                    elevation = nutritionCardElevation(),
-                    shape = MaterialTheme.shapes.extraLarge
+        } else {
+            // Tab 0: Menu Content
+            item { Spacer(Modifier.height(12.dp)) }
+            item {
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn(tween(300)) + slideInVertically(
+                        initialOffsetY = { it / 6 },
+                        animationSpec = tween(300)
+                    )
                 ) {
-                    Column(
-                        Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                        colors = nutritionCardColors(),
+                        elevation = nutritionCardElevation(),
+                        shape = MaterialTheme.shapes.extraLarge
                     ) {
-                        Text(
-                            stringResource(Res.string.nutrition_macros_chart_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = contentColor
-                        )
-                        RingChart(
-                            values = listOf(
-                                proteinDay.toFloat(),
-                                fatDay.toFloat(),
-                                carbsDay.toFloat()
-                            ),
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.tertiary,
-                                MaterialTheme.colorScheme.secondary
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        val macroStats = listOf(
-                            StatChipInfo(
-                                stringResource(Res.string.nutrition_macro_protein).uppercase(),
-                                stringResource(Res.string.nutrition_grams_value).kmpFormat(proteinDay),
-                                Icons.Filled.Egg
-                            ),
-                            StatChipInfo(
-                                stringResource(Res.string.nutrition_macro_fat).uppercase(),
-                                stringResource(Res.string.nutrition_grams_value).kmpFormat(fatDay),
-                                Icons.Filled.BakeryDining
-                            ),
-                            StatChipInfo(
-                                stringResource(Res.string.nutrition_macro_carbs).uppercase(),
-                                stringResource(Res.string.nutrition_grams_value).kmpFormat(carbsDay),
-                                Icons.Filled.WaterDrop
+                        Column(
+                            Modifier.padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text(
+                                stringResource(Res.string.nutrition_macros_chart_title),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = contentColor
                             )
-                        )
-                        StatChipGrid(
-                            stats = macroStats,
-                            columns = min(3, macroStats.size),
-                            horizontalSpacing = 16.dp
-                        )
-                    }
-                }
-            }
-        }
-        item {
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(tween(350, delayMillis = 60)) + slideInVertically(
-                    initialOffsetY = { it / 6 },
-                    animationSpec = tween(350)
-                )
-            ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = nutritionCardColors(),
-                    elevation = nutritionCardElevation(),
-                    shape = MaterialTheme.shapes.extraLarge
-                ) {
-                    Column(
-                        Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Text(
-                            stringResource(Res.string.nutrition_day_totals),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = contentColor
-                        )
-                        StatChipGrid(
-                            stats = listOf(
+                            RingChart(
+                                values = listOf(
+                                    proteinDay.toFloat(),
+                                    fatDay.toFloat(),
+                                    carbsDay.toFloat()
+                                ),
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.tertiary,
+                                    MaterialTheme.colorScheme.secondary
+                                ),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            val macroStats = listOf(
                                 StatChipInfo(
                                     stringResource(Res.string.nutrition_macro_protein).uppercase(),
                                     stringResource(Res.string.nutrition_grams_value).kmpFormat(proteinDay),
@@ -424,159 +371,216 @@ private fun NutritionContent(
                                     stringResource(Res.string.nutrition_macro_carbs).uppercase(),
                                     stringResource(Res.string.nutrition_grams_value).kmpFormat(carbsDay),
                                     Icons.Filled.WaterDrop
-                                ),
-                                StatChipInfo(
-                                    stringResource(Res.string.nutrition_macro_kcal).uppercase(),
-                                    kcalDay.toString(),
-                                    Icons.Filled.LocalFireDepartment
                                 )
-                            ),
-                            columns = 2
-                        )
+                            )
+                            StatChipGrid(
+                                stats = macroStats,
+                                columns = min(3, macroStats.size),
+                                horizontalSpacing = 16.dp
+                            )
+                        }
                     }
                 }
             }
-        }
-        item {
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(tween(400, delayMillis = 100)) + slideInVertically(
-                    initialOffsetY = { it / 6 },
-                    animationSpec = tween(400)
-                )
-            ) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = nutritionCardColors(),
-                    elevation = nutritionCardElevation(),
-                    shape = MaterialTheme.shapes.extraLarge
+            item { Spacer(Modifier.height(20.dp)) }
+            item {
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn(tween(350, delayMillis = 60)) + slideInVertically(
+                        initialOffsetY = { it / 6 },
+                        animationSpec = tween(350)
+                    )
                 ) {
-                    Column(
-                        Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                        colors = nutritionCardColors(),
+                        elevation = nutritionCardElevation(),
+                        shape = MaterialTheme.shapes.extraLarge
                     ) {
-                        Text(
-                            stringResource(Res.string.nutrition_week_totals),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = contentColor
-                        )
-                        StatChipGrid(
-                            stats = listOf(
-                                StatChipInfo(
-                                    stringResource(Res.string.nutrition_macro_protein).uppercase(),
-                                    stringResource(Res.string.nutrition_grams_value).kmpFormat(proteinWeek),
-                                    Icons.Filled.Egg
-                                ),
-                                StatChipInfo(
-                                    stringResource(Res.string.nutrition_macro_fat).uppercase(),
-                                    stringResource(Res.string.nutrition_grams_value).kmpFormat(fatWeek),
-                                    Icons.Filled.BakeryDining
-                                ),
-                                StatChipInfo(
-                                    stringResource(Res.string.nutrition_macro_carbs).uppercase(),
-                                    stringResource(Res.string.nutrition_grams_value).kmpFormat(carbsWeek),
-                                    Icons.Filled.WaterDrop
-                                ),
-                                StatChipInfo(
-                                    stringResource(Res.string.nutrition_macro_kcal).uppercase(),
-                                    kcalWeek.toString(),
-                                    Icons.Filled.LocalFireDepartment
-                                )
-                            ),
-                            columns = 2
-                        )
-                    }
-                }
-            }
-        }
-        itemsIndexed(dayMeals) { index, meal ->
-            val accent = macroAccentPalette[index % macroAccentPalette.size]
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(tween(350)) + slideInVertically(
-                    initialOffsetY = { it / 8 },
-                    animationSpec = tween(350)
-                )
-            ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onOpenMeal(selectedDay, index) },
-                    colors = nutritionCardColors(),
-                    elevation = nutritionCardElevation(),
-                    shape = MaterialTheme.shapes.extraLarge
-                ) {
-                    Column(
-                        Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                        Column(
+                            Modifier.padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .height(48.dp)
-                                        .width(6.dp)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(accent)
-                                )
-                                Column {
-                                    Text(
-                                        meal.name,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF2D2D2D)
+                            Text(
+                                stringResource(Res.string.nutrition_day_totals),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = contentColor
+                            )
+                            StatChipGrid(
+                                stats = listOf(
+                                    StatChipInfo(
+                                        stringResource(Res.string.nutrition_macro_protein).uppercase(),
+                                        stringResource(Res.string.nutrition_grams_value).kmpFormat(proteinDay),
+                                        Icons.Filled.Egg
+                                    ),
+                                    StatChipInfo(
+                                        stringResource(Res.string.nutrition_macro_fat).uppercase(),
+                                        stringResource(Res.string.nutrition_grams_value).kmpFormat(fatDay),
+                                        Icons.Filled.BakeryDining
+                                    ),
+                                    StatChipInfo(
+                                        stringResource(Res.string.nutrition_macro_carbs).uppercase(),
+                                        stringResource(Res.string.nutrition_grams_value).kmpFormat(carbsDay),
+                                        Icons.Filled.WaterDrop
+                                    ),
+                                    StatChipInfo(
+                                        stringResource(Res.string.nutrition_macro_kcal).uppercase(),
+                                        kcalDay.toString(),
+                                        Icons.Filled.LocalFireDepartment
                                     )
+                                ),
+                                columns = 2
+                            )
+                        }
+                    }
+                }
+            }
+            item { Spacer(Modifier.height(20.dp)) }
+            item {
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn(tween(400, delayMillis = 100)) + slideInVertically(
+                        initialOffsetY = { it / 6 },
+                        animationSpec = tween(400)
+                    )
+                ) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                        colors = nutritionCardColors(),
+                        elevation = nutritionCardElevation(),
+                        shape = MaterialTheme.shapes.extraLarge
+                    ) {
+                        Column(
+                            Modifier.padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text(
+                                stringResource(Res.string.nutrition_week_totals),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = contentColor
+                            )
+                            StatChipGrid(
+                                stats = listOf(
+                                    StatChipInfo(
+                                        stringResource(Res.string.nutrition_macro_protein).uppercase(),
+                                        stringResource(Res.string.nutrition_grams_value).kmpFormat(proteinWeek),
+                                        Icons.Filled.Egg
+                                    ),
+                                    StatChipInfo(
+                                        stringResource(Res.string.nutrition_macro_fat).uppercase(),
+                                        stringResource(Res.string.nutrition_grams_value).kmpFormat(fatWeek),
+                                        Icons.Filled.BakeryDining
+                                    ),
+                                    StatChipInfo(
+                                        stringResource(Res.string.nutrition_macro_carbs).uppercase(),
+                                        stringResource(Res.string.nutrition_grams_value).kmpFormat(carbsWeek),
+                                        Icons.Filled.WaterDrop
+                                    ),
+                                    StatChipInfo(
+                                        stringResource(Res.string.nutrition_macro_kcal).uppercase(),
+                                        kcalWeek.toString(),
+                                        Icons.Filled.LocalFireDepartment
+                                    )
+                                ),
+                                columns = 2
+                            )
+                        }
+                    }
+                }
+            }
+            item { Spacer(Modifier.height(20.dp)) }
+            itemsIndexed(dayMeals) { index, meal ->
+                val accent = macroAccentPalette[index % macroAccentPalette.size]
+                Box(Modifier.padding(horizontal = 20.dp, vertical = 10.dp)) {
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = fadeIn(tween(350)) + slideInVertically(
+                            initialOffsetY = { it / 8 },
+                            animationSpec = tween(350)
+                        )
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onOpenMeal(selectedDay, index) },
+                            colors = nutritionCardColors(),
+                            elevation = nutritionCardElevation(),
+                            shape = MaterialTheme.shapes.extraLarge
+                        ) {
+                            Column(
+                                Modifier.padding(20.dp),
+                                verticalArrangement = Arrangement.spacedBy(14.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .height(48.dp)
+                                                .width(6.dp)
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .background(accent)
+                                        )
+                                        Column {
+                                            Text(
+                                                meal.name,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color(0xFF2D2D2D)
+                                            )
+                                            Text(
+                                                stringResource(Res.string.nutrition_meal_meta).kmpFormat(
+                                                    meal.ingredients.size,
+                                                    meal.macros.kcal
+                                                ),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = Color(0xFF4B4B4B)
+                                            )
+                                        }
+                                    }
                                     Text(
-                                        stringResource(Res.string.nutrition_meal_meta).kmpFormat(
-                                            meal.ingredients.size,
-                                            meal.macros.kcal
-                                        ),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color(0xFF4B4B4B)
+                                        stringResource(Res.string.nutrition_kcal_value).kmpFormat(meal.kcal),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    MacroPill(
+                                        stringResource(Res.string.nutrition_macro_protein),
+                                        stringResource(Res.string.nutrition_grams_value).kmpFormat(meal.macros.proteinGrams),
+                                        accent
+                                    )
+                                    MacroPill(
+                                        stringResource(Res.string.nutrition_macro_fat),
+                                        stringResource(Res.string.nutrition_grams_value).kmpFormat(meal.macros.fatGrams),
+                                        MaterialTheme.colorScheme.secondary
+                                    )
+                                    MacroPill(
+                                        stringResource(Res.string.nutrition_macro_carbs),
+                                        stringResource(Res.string.nutrition_grams_value).kmpFormat(meal.macros.carbsGrams),
+                                        MaterialTheme.colorScheme.tertiary
+                                    )
+                                }
+                                Text(
+                                    text = stringResource(Res.string.nutrition_ingredients) + ": " + meal.ingredients.joinToString(),
+                                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
+                                    color = Color(0xFF3A3A3A)
+                                )
                             }
-                            Text(
-                                stringResource(Res.string.nutrition_kcal_value).kmpFormat(meal.kcal),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
                         }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            MacroPill(
-                                stringResource(Res.string.nutrition_macro_protein),
-                                stringResource(Res.string.nutrition_grams_value).kmpFormat(meal.macros.proteinGrams),
-                                accent
-                            )
-                            MacroPill(
-                                stringResource(Res.string.nutrition_macro_fat),
-                                stringResource(Res.string.nutrition_grams_value).kmpFormat(meal.macros.fatGrams),
-                                MaterialTheme.colorScheme.secondary
-                            )
-                            MacroPill(
-                                stringResource(Res.string.nutrition_macro_carbs),
-                                stringResource(Res.string.nutrition_grams_value).kmpFormat(meal.macros.carbsGrams),
-                                MaterialTheme.colorScheme.tertiary
-                            )
-                        }
-                        Text(
-                            text = stringResource(Res.string.nutrition_ingredients) + ": " + meal.ingredients.joinToString(),
-                            style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
-                            color = Color(0xFF3A3A3A)
-                        )
                     }
                 }
             }

@@ -55,8 +55,6 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                // PaddingValues создают эффект: в начале и конце списка контент не под барами, 
-                // но при скролле он свободно уходит под них.
                 contentPadding = PaddingValues(
                     top = topBarHeight + 16.dp, 
                     bottom = bottomBarHeight + 32.dp,
@@ -104,7 +102,7 @@ fun HomeScreen(
                 item {
                     AnimatedVisibility(
                         visible = true,
-                        enter = fadeIn(animationSpec = tween(450, delayMillis = 140)) + slideInVertically(
+                        enter = fadeIn(tween(450, delayMillis = 140)) + slideInVertically(
                             initialOffsetY = { it / 3 },
                             animationSpec = tween(450)
                         )
@@ -125,33 +123,42 @@ private fun OverviewCard(sets: Int, volume: Int, sleepMinutes: Int) {
         elevation = homeCardElevation(),
         shape = MaterialTheme.shapes.large
     ) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            modifier = Modifier.padding(20.dp), 
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 stringResource(Res.string.home_today),
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Start)
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 StatChip(
-                    stringResource(Res.string.home_sets),
-                    stringResource(Res.string.home_sets_value).kmpFormat(sets),
-                    icon = Icons.Filled.FitnessCenter
+                    label = stringResource(Res.string.home_sets),
+                    value = stringResource(Res.string.home_sets_value).kmpFormat(sets),
+                    icon = Icons.Filled.FitnessCenter,
+                    modifier = Modifier.weight(1f)
                 )
                 StatChip(
-                    stringResource(Res.string.home_volume),
-                    stringResource(Res.string.home_volume_value).kmpFormat(volume),
-                    icon = Icons.Filled.Whatshot
+                    label = stringResource(Res.string.home_volume),
+                    value = stringResource(Res.string.home_volume_value).kmpFormat(volume),
+                    icon = Icons.Filled.Whatshot,
+                    modifier = Modifier.weight(1f)
                 )
                 StatChip(
-                    stringResource(Res.string.home_sleep_hours),
-                    stringResource(Res.string.home_sleep_value).kmpFormat(
+                    label = stringResource(Res.string.home_sleep_hours),
+                    value = stringResource(Res.string.home_sleep_value).kmpFormat(
                         sleepMinutes / 60,
                         sleepMinutes % 60
                     ),
-                    icon = Icons.Filled.Bedtime
+                    icon = Icons.Filled.Bedtime,
+                    modifier = Modifier.weight(1f)
                 )
             }
         }

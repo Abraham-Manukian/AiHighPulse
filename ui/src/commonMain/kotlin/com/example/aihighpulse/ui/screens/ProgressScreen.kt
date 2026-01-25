@@ -7,13 +7,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -26,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.aihighpulse.core.designsystem.components.BarChart
 import com.example.aihighpulse.core.designsystem.components.BrandScreen
@@ -57,6 +52,7 @@ fun ProgressScreen(
     BrandScreen(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
             contentPadding = PaddingValues(
                 start = 20.dp,
                 top = topBarHeight + 16.dp,
@@ -66,6 +62,16 @@ fun ProgressScreen(
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             item {
+                Text(
+                    stringResource(Res.string.progress_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                )
+            }
+            item {
                 AnimatedVisibility(
                     visible = true,
                     enter = fadeIn(tween(300)) + slideInVertically(
@@ -74,25 +80,30 @@ fun ProgressScreen(
                     )
                 ) {
                     Card(
+                        modifier = Modifier.widthIn(max = 600.dp).fillMaxWidth(),
                         colors = progressCardColors(),
                         elevation = progressCardElevation(),
                         shape = MaterialTheme.shapes.extraLarge
                     ) {
                         Column(
                             Modifier.padding(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
                                 stringResource(Res.string.progress_total_workouts).kmpFormat(state.totalWorkouts),
-                                color = contentColor
+                                color = contentColor,
+                                textAlign = TextAlign.Center
                             )
                             Text(
                                 stringResource(Res.string.progress_total_sets).kmpFormat(state.totalSets),
-                                color = contentColor
+                                color = contentColor,
+                                textAlign = TextAlign.Center
                             )
                             Text(
                                 stringResource(Res.string.progress_total_volume).kmpFormat(state.totalVolume),
-                                color = contentColor
+                                color = contentColor,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
@@ -107,19 +118,22 @@ fun ProgressScreen(
                     )
                 ) {
                     Card(
+                        modifier = Modifier.widthIn(max = 600.dp).fillMaxWidth(),
                         colors = progressCardColors(),
                         elevation = progressCardElevation(),
                         shape = MaterialTheme.shapes.extraLarge
                     ) {
                         Column(
                             Modifier.padding(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
                                 stringResource(Res.string.progress_weekly_volume),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
-                                color = contentColor
+                                color = contentColor,
+                                textAlign = TextAlign.Center
                             )
                             BarChart(
                                 data = state.weeklyVolumes.map { it.coerceAtLeast(0) },
@@ -158,19 +172,22 @@ fun ProgressScreen(
                     )
                 ) {
                     Card(
+                        modifier = Modifier.widthIn(max = 600.dp).fillMaxWidth(),
                         colors = progressCardColors(),
                         elevation = progressCardElevation(),
                         shape = MaterialTheme.shapes.extraLarge
                     ) {
                         Column(
                             Modifier.padding(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
                                 stringResource(Res.string.sleep_weekly_chart_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
-                                color = contentColor
+                                color = contentColor,
+                                textAlign = TextAlign.Center
                             )
                             BarChart(
                                 data = state.sleepHoursWeek,
@@ -179,7 +196,8 @@ fun ProgressScreen(
                             Text(
                                 stringResource(Res.string.sleep_title),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = contentColor.copy(alpha = 0.85f)
+                                color = contentColor.copy(alpha = 0.85f),
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
