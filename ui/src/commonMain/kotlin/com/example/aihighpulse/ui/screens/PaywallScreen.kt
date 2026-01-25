@@ -15,10 +15,14 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Star
@@ -48,6 +52,8 @@ import androidx.compose.ui.unit.dp
 import com.example.aihighpulse.core.designsystem.components.BrandScreen
 import com.example.aihighpulse.core.designsystem.theme.AiPalette
 import com.example.aihighpulse.ui.*
+import com.vtempe.ui.LocalBottomBarHeight
+import com.vtempe.ui.LocalTopBarHeight
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -64,28 +70,20 @@ fun PaywallScreen(
         label = "ctaScale"
     )
     val contentColor = Color.White
+    
+    val topBarHeight = LocalTopBarHeight.current
+    val bottomBarHeight = LocalBottomBarHeight.current
 
     BrandScreen(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 20.dp, vertical = 24.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(animationSpec = tween(300)) + slideInVertically(
-                    initialOffsetY = { it / 4 },
-                    animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
-                )
-            ) {
-                Text(
-                    text = stringResource(Res.string.paywall_title),
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = contentColor
-                )
-            }
+            Spacer(Modifier.height(topBarHeight + 16.dp))
+
             AnimatedVisibility(
                 visible = true,
                 enter = fadeIn(animationSpec = tween(400, delayMillis = 80))
@@ -169,6 +167,8 @@ fun PaywallScreen(
                     }
                 }
             }
+            
+            Spacer(Modifier.height(bottomBarHeight + 32.dp))
         }
     }
 }

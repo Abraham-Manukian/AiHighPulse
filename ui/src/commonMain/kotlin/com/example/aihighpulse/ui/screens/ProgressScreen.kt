@@ -25,13 +25,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-	import androidx.compose.ui.text.font.FontWeight
-	import androidx.compose.ui.unit.dp
-	import com.example.aihighpulse.core.designsystem.components.BarChart
-	import com.example.aihighpulse.core.designsystem.components.BrandScreen
-	import com.example.aihighpulse.core.designsystem.theme.AiPalette
-	import com.example.aihighpulse.ui.util.kmpFormat
-	import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.example.aihighpulse.core.designsystem.components.BarChart
+import com.example.aihighpulse.core.designsystem.components.BrandScreen
+import com.example.aihighpulse.core.designsystem.theme.AiPalette
+import com.example.aihighpulse.ui.util.kmpFormat
+import com.vtempe.ui.LocalBottomBarHeight
+import com.vtempe.ui.LocalTopBarHeight
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ProgressScreen(
@@ -48,21 +50,21 @@ fun ProgressScreen(
         stringResource(Res.string.day_sun_short)
     )
     val contentColor = AiPalette.OnGradient
+    
+    val topBarHeight = LocalTopBarHeight.current
+    val bottomBarHeight = LocalBottomBarHeight.current
 
     BrandScreen(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+            contentPadding = PaddingValues(
+                start = 20.dp,
+                top = topBarHeight + 16.dp,
+                end = 20.dp,
+                bottom = bottomBarHeight + 32.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            item {
-                Text(
-                    stringResource(Res.string.progress_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
             item {
                 AnimatedVisibility(
                     visible = true,
@@ -80,18 +82,18 @@ fun ProgressScreen(
                             Modifier.padding(20.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-	                            Text(
-	                                stringResource(Res.string.progress_total_workouts).kmpFormat(state.totalWorkouts),
-	                                color = contentColor
-	                            )
-	                            Text(
-	                                stringResource(Res.string.progress_total_sets).kmpFormat(state.totalSets),
-	                                color = contentColor
-	                            )
-	                            Text(
-	                                stringResource(Res.string.progress_total_volume).kmpFormat(state.totalVolume),
-	                                color = contentColor
-	                            )
+                            Text(
+                                stringResource(Res.string.progress_total_workouts).kmpFormat(state.totalWorkouts),
+                                color = contentColor
+                            )
+                            Text(
+                                stringResource(Res.string.progress_total_sets).kmpFormat(state.totalSets),
+                                color = contentColor
+                            )
+                            Text(
+                                stringResource(Res.string.progress_total_volume).kmpFormat(state.totalVolume),
+                                color = contentColor
+                            )
                         }
                     }
                 }

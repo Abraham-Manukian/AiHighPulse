@@ -37,6 +37,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.example.aihighpulse.core.designsystem.components.BrandScreen
 import com.example.aihighpulse.shared.domain.repository.ChatMessage
+import com.vtempe.ui.LocalBottomBarHeight
+import com.vtempe.ui.LocalTopBarHeight
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -44,15 +46,23 @@ fun ChatScreen(
     presenter: ChatPresenter = rememberChatPresenter()
 ) {
     val state by presenter.state.collectAsState()
+    
+    val topBarHeight = LocalTopBarHeight.current
+    val bottomBarHeight = LocalBottomBarHeight.current
+
     BrandScreen(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
+            // Отступ сверху для топ бара
+            Spacer(Modifier.size(topBarHeight))
+            
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(12.dp),
+                    .padding(horizontal = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                item { Spacer(Modifier.size(12.dp)) }
                 items(state.messages) { msg ->
                     AnimatedVisibility(
                         visible = true,
@@ -64,12 +74,14 @@ fun ChatScreen(
                         MessageBubble(msg)
                     }
                 }
+                item { Spacer(Modifier.size(12.dp)) }
             }
             Divider()
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(8.dp)
+                    .padding(bottom = bottomBarHeight), // Отступ снизу для боттом бара
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
@@ -105,7 +117,7 @@ fun ChatScreen(
                 Text(
                     errorMessage,
                     color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.padding(8.dp).padding(bottom = bottomBarHeight)
                 )
             }
         }

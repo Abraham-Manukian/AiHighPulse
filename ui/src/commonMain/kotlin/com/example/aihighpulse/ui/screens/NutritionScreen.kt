@@ -67,13 +67,15 @@ import androidx.compose.ui.unit.sp
 import com.example.aihighpulse.core.designsystem.components.BrandScreen
 import com.example.aihighpulse.core.designsystem.components.PlaceholderScreen
 import com.example.aihighpulse.core.designsystem.components.RingChart
-	import com.example.aihighpulse.core.designsystem.components.StatChip
-	import com.example.aihighpulse.core.designsystem.theme.AiPalette
-	import com.example.aihighpulse.shared.domain.model.NutritionPlan
-	import com.example.aihighpulse.ui.state.UiState
-	import com.example.aihighpulse.ui.util.kmpFormat
-	import org.jetbrains.compose.resources.stringResource
-	import kotlin.math.min
+import com.example.aihighpulse.core.designsystem.components.StatChip
+import com.example.aihighpulse.core.designsystem.theme.AiPalette
+import com.example.aihighpulse.shared.domain.model.NutritionPlan
+import com.example.aihighpulse.ui.state.UiState
+import com.example.aihighpulse.ui.util.kmpFormat
+import com.vtempe.ui.LocalBottomBarHeight
+import com.vtempe.ui.LocalTopBarHeight
+import org.jetbrains.compose.resources.stringResource
+import kotlin.math.min
 
 @Composable
 fun NutritionScreen(
@@ -93,11 +95,17 @@ fun NutritionScreen(
     )
     val contentColor = AiPalette.OnGradient
     var tab by remember { mutableStateOf(0) }
+    
+    val topBarHeight = LocalTopBarHeight.current
+    val bottomBarHeight = LocalBottomBarHeight.current
 
     BrandScreen(Modifier.fillMaxSize()) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val isCompactWidth = maxWidth < 360.dp
             Column(Modifier.fillMaxSize()) {
+                // Добавляем отступ сверху для "парящего" топ бара
+                Spacer(Modifier.height(topBarHeight))
+                
                 if (isCompactWidth) {
                     FlowRow(
                         modifier = Modifier
@@ -180,7 +188,7 @@ fun NutritionScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .fillMaxSize()
+                        .weight(1f) // Используем weight чтобы контент занимал оставшееся место
                 ) {
                     Crossfade(targetState = state.ui, label = "nutrition-ui") { uiState ->
                         when (uiState) {
@@ -199,7 +207,8 @@ fun NutritionScreen(
                                 plan = uiState.value,
                                 selectedDay = state.selectedDay,
                                 contentColor = contentColor,
-                                onOpenMeal = onOpenMeal
+                                onOpenMeal = onOpenMeal,
+                                bottomPadding = bottomBarHeight
                             )
                         }
                     }
@@ -215,13 +224,19 @@ private fun NutritionContent(
     plan: NutritionPlan,
     selectedDay: String,
     contentColor: Color,
-    onOpenMeal: (day: String, index: Int) -> Unit
+    onOpenMeal: (day: String, index: Int) -> Unit,
+    bottomPadding: Dp = 0.dp
 ) {
     if (tab == 1) {
         val items = plan.shoppingList
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+            contentPadding = PaddingValues(
+                start = 20.dp,
+                end = 20.dp, 
+                top = 12.dp, 
+                bottom = bottomPadding + 32.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
@@ -298,7 +313,12 @@ private fun NutritionContent(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
+        contentPadding = PaddingValues(
+            start = 20.dp,
+            end = 20.dp, 
+            top = 12.dp, 
+            bottom = bottomPadding + 32.dp
+        ),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         item {
@@ -514,43 +534,43 @@ private fun NutritionContent(
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFF2D2D2D)
                                     )
-	                                    Text(
-	                                        stringResource(Res.string.nutrition_meal_meta).kmpFormat(
-	                                            meal.ingredients.size,
-	                                            meal.macros.kcal
-	                                        ),
-	                                        style = MaterialTheme.typography.bodySmall,
-	                                        color = Color(0xFF4B4B4B)
-	                                    )
+                                    Text(
+                                        stringResource(Res.string.nutrition_meal_meta).kmpFormat(
+                                            meal.ingredients.size,
+                                            meal.macros.kcal
+                                        ),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color(0xFF4B4B4B)
+                                    )
                                 }
                             }
-	                            Text(
-	                                stringResource(Res.string.nutrition_kcal_value).kmpFormat(meal.kcal),
-	                                style = MaterialTheme.typography.labelLarge,
-	                                fontWeight = FontWeight.Bold,
-	                                color = MaterialTheme.colorScheme.primary
-	                            )
+                            Text(
+                                stringResource(Res.string.nutrition_kcal_value).kmpFormat(meal.kcal),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-	                            MacroPill(
-	                                stringResource(Res.string.nutrition_macro_protein),
-	                                stringResource(Res.string.nutrition_grams_value).kmpFormat(meal.macros.proteinGrams),
-	                                accent
-	                            )
-	                            MacroPill(
-	                                stringResource(Res.string.nutrition_macro_fat),
-	                                stringResource(Res.string.nutrition_grams_value).kmpFormat(meal.macros.fatGrams),
-	                                MaterialTheme.colorScheme.secondary
-	                            )
-	                            MacroPill(
-	                                stringResource(Res.string.nutrition_macro_carbs),
-	                                stringResource(Res.string.nutrition_grams_value).kmpFormat(meal.macros.carbsGrams),
-	                                MaterialTheme.colorScheme.tertiary
-	                            )
+                            MacroPill(
+                                stringResource(Res.string.nutrition_macro_protein),
+                                stringResource(Res.string.nutrition_grams_value).kmpFormat(meal.macros.proteinGrams),
+                                accent
+                            )
+                            MacroPill(
+                                stringResource(Res.string.nutrition_macro_fat),
+                                stringResource(Res.string.nutrition_grams_value).kmpFormat(meal.macros.fatGrams),
+                                MaterialTheme.colorScheme.secondary
+                            )
+                            MacroPill(
+                                stringResource(Res.string.nutrition_macro_carbs),
+                                stringResource(Res.string.nutrition_grams_value).kmpFormat(meal.macros.carbsGrams),
+                                MaterialTheme.colorScheme.tertiary
+                            )
                         }
                         Text(
                             text = stringResource(Res.string.nutrition_ingredients) + ": " + meal.ingredients.joinToString(),

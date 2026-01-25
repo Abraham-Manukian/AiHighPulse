@@ -61,17 +61,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-	import androidx.compose.ui.text.font.FontWeight
-	import androidx.compose.ui.text.style.TextOverflow
-	import androidx.compose.ui.unit.dp
-	import com.example.aihighpulse.core.designsystem.components.BrandScreen
-	import com.example.aihighpulse.core.designsystem.theme.AiPalette
-	import com.example.aihighpulse.shared.domain.model.Workout
-	import com.example.aihighpulse.shared.domain.model.WorkoutSet
-	import com.example.aihighpulse.ui.util.kmpFormat
-	import kotlinx.coroutines.launch
-	import org.jetbrains.compose.resources.stringResource
-	import kotlin.math.roundToInt
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import com.example.aihighpulse.core.designsystem.components.BrandScreen
+import com.example.aihighpulse.core.designsystem.theme.AiPalette
+import com.example.aihighpulse.shared.domain.model.Workout
+import com.example.aihighpulse.shared.domain.model.WorkoutSet
+import com.example.aihighpulse.ui.util.kmpFormat
+import com.vtempe.ui.LocalBottomBarHeight
+import com.vtempe.ui.LocalTopBarHeight
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
 
 @Composable
 fun WorkoutScreen(
@@ -79,50 +81,53 @@ fun WorkoutScreen(
 ) {
     val state by presenter.state.collectAsState()
     val showAddSheet = remember { mutableStateOf(false) }
+    
+    val topBarHeight = LocalTopBarHeight.current
+    val bottomBarHeight = LocalBottomBarHeight.current
 
     BrandScreen(Modifier.fillMaxSize()) {
         Scaffold(
             containerColor = Color.Transparent,
             floatingActionButton = {
-                FloatingActionButton(onClick = { showAddSheet.value = true }) {
+                FloatingActionButton(
+                    modifier = Modifier.padding(bottom = bottomBarHeight),
+                    onClick = { showAddSheet.value = true }
+                ) {
                     Icon(Icons.Filled.Add, contentDescription = stringResource(Res.string.workout_add_button))
                 }
             }
         ) { padding ->
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    top = topBarHeight + 16.dp,
+                    bottom = bottomBarHeight + 80.dp, // Оставляем место под FAB и отступ
+                    start = 20.dp,
+                    end = 20.dp
+                ),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                LazyColumn(
-                    contentPadding = PaddingValues(bottom = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    items(state.workouts) { workout ->
-                        val feedback = state.feedback[workout.id] ?: WorkoutFeedback()
-                        val selected = state.selectedWorkoutId == workout.id
-                        AnimatedVisibility(
-                            visible = true,
-                            enter = fadeIn(animationSpec = tween(300)) + slideInVertically(
-                                initialOffsetY = { it / 5 },
-                                animationSpec = tween(300)
-                            )
-                        ) {
-                            WorkoutCard(
-                                workout = workout,
-                                feedback = feedback,
-                                selected = selected,
-                                onSelect = { presenter.select(workout.id) },
-                                onToggle = { index, completed ->
-                                    presenter.toggleSetCompleted(workout.id, index, completed)
-                                },
-                                onUpdateNotes = { presenter.updateNotes(workout.id, it) },
-                                onSubmit = { presenter.submitFeedback(workout.id) }
-                            )
-                        }
+                items(state.workouts) { workout ->
+                    val feedback = state.feedback[workout.id] ?: WorkoutFeedback()
+                    val selected = state.selectedWorkoutId == workout.id
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = fadeIn(animationSpec = tween(300)) + slideInVertically(
+                            initialOffsetY = { it / 5 },
+                            animationSpec = tween(300)
+                        )
+                    ) {
+                        WorkoutCard(
+                            workout = workout,
+                            feedback = feedback,
+                            selected = selected,
+                            onSelect = { presenter.select(workout.id) },
+                            onToggle = { index, completed ->
+                                presenter.toggleSetCompleted(workout.id, index, completed)
+                            },
+                            onUpdateNotes = { presenter.updateNotes(workout.id, it) },
+                            onSubmit = { presenter.submitFeedback(workout.id) }
+                        )
                     }
                 }
             }
@@ -211,16 +216,16 @@ private fun WorkoutCard(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-	                        val weightLabel = set.weightKg?.let {
-	                            stringResource(Res.string.workout_weight_display).kmpFormat(it)
-	                        } ?: stringResource(Res.string.workout_weight_bodyweight)
-	                        Text(
-	                            stringResource(Res.string.workout_set_summary).kmpFormat(
-	                                set.reps,
-	                                weightLabel
-	                            ),
-	                            color = MaterialTheme.colorScheme.onSurfaceVariant
-	                        )
+                        val weightLabel = set.weightKg?.let {
+                            stringResource(Res.string.workout_weight_display).kmpFormat(it)
+                        } ?: stringResource(Res.string.workout_weight_bodyweight)
+                        Text(
+                            stringResource(Res.string.workout_set_summary).kmpFormat(
+                                set.reps,
+                                weightLabel
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
@@ -271,15 +276,15 @@ private fun WorkoutCardHeader(
             Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Text(date, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-	        Text(
-	            stringResource(Res.string.workout_progress_status).kmpFormat(
-	                (progress * 100).roundToInt(),
-	                completed,
-	                setsCount
-	            ),
-	            style = MaterialTheme.typography.labelMedium,
-	            color = MaterialTheme.colorScheme.primary
-	        )
+        Text(
+            stringResource(Res.string.workout_progress_status).kmpFormat(
+                (progress * 100).roundToInt(),
+                completed,
+                setsCount
+            ),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 

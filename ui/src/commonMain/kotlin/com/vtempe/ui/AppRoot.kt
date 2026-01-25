@@ -1,66 +1,102 @@
 package com.vtempe.ui
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.example.aihighpulse.core.designsystem.icons.AiIcons
 import com.example.aihighpulse.ui.navigation.Routes
 import com.example.aihighpulse.ui.navigation.nutritionDetail
-import com.example.aihighpulse.ui.screens.ChatScreen
-import com.example.aihighpulse.ui.screens.EditProfileScreen
-import com.example.aihighpulse.ui.screens.HomeScreen
-import com.example.aihighpulse.ui.screens.NutritionDetailScreen
-import com.example.aihighpulse.ui.screens.NutritionScreen
-import com.example.aihighpulse.ui.screens.OnboardingScreen
-import com.example.aihighpulse.ui.screens.PaywallScreen
-import com.example.aihighpulse.ui.screens.ProgressScreen
-import com.example.aihighpulse.ui.screens.SettingsScreen
-import com.example.aihighpulse.ui.screens.ShoppingListScreen
-import com.example.aihighpulse.ui.screens.SleepScreen
-import com.example.aihighpulse.ui.screens.SplashScreen
-import com.example.aihighpulse.ui.screens.WorkoutScreen
+import com.example.aihighpulse.ui.screens.*
 import com.example.aihighpulse.ui.theme.AiHighPulseTheme
 import com.example.aihighpulse.ui.*
+import com.example.aihighpulse.ui.navigation.Routes.bottomNavRoutes
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+
+// Глобальные провайдеры для высот баров, чтобы использовать в экранах
+val LocalTopBarHeight = compositionLocalOf { 0.dp }
+val LocalBottomBarHeight = compositionLocalOf { 0.dp }
 
 @Composable
 fun AppRoot() {
     AiHighPulseTheme {
-        var currentRoute by remember { mutableStateOf(Routes.Splash) }
+        var currentRoute by remember { mutableStateOf(Routes.Home) }
         val tabRoutes = bottomDestinations.map { it.route }
+        val isTabRoute = currentRoute in tabRoutes
 
-        Scaffold(
-            bottomBar = {
-                if (currentRoute in tabRoutes) {
-                    BottomTabs(
-                        selectedRoute = currentRoute,
-                        onRouteSelected = { currentRoute = it }
+        val density = LocalDensity.current
+        var topBarHeight by remember { mutableStateOf(0.dp) }
+        var bottomBarHeight by remember { mutableStateOf(0.dp) }
+
+        // Пробрасываем высоты баров вниз по дереву
+        CompositionLocalProvider(
+            LocalTopBarHeight provides topBarHeight,
+            LocalBottomBarHeight provides bottomBarHeight
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                AppBackground()
+
+                Scaffold(
+                    containerColor = Color.Transparent,
+                    contentWindowInsets = WindowInsets(0, 0, 0, 0)
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        AppNavigationHost(
+                            currentRoute = currentRoute,
+                            onNavigate = { dest -> currentRoute = dest }
+                        )
+                    }
+                }
+
+                // Top Bar
+                GlassTopBarContainer(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .onGloballyPositioned { coords ->
+                            topBarHeight = with(density) { coords.size.height.toDp() }
+                        }
+                ) {
+                    TopBar(
+                        currentRoute = currentRoute,
+                        onNavigate = { currentRoute = it }
                     )
                 }
-            }
-        ) { innerPadding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
-                AppNavigationHost(
-                    currentRoute = currentRoute,
-                    onNavigate = { destination -> currentRoute = destination }
-                )
+
+                // Bottom Bar
+                if (isTabRoute) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .navigationBarsPadding()
+                            .padding(bottom = 14.dp)
+                            .onGloballyPositioned { coords ->
+                                bottomBarHeight = with(density) { coords.size.height.toDp() }
+                            }
+                    ) {
+                        GlassBottomBarContainer {
+                            BottomTabs(
+                                selectedRoute = currentRoute,
+                                onRouteSelected = { currentRoute = it }
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -87,7 +123,6 @@ private fun AppNavigationHost(
         Routes.Chat -> ChatScreen()
         Routes.ShoppingList -> ShoppingListScreen(onBack = { onNavigate(Routes.Nutrition) })
         else -> {
-            // Handle simple detail route string like nutrition_detail/Mon/0
             if (currentRoute.startsWith("nutrition_detail")) {
                 val segments = currentRoute.split("/")
                 val day = segments.getOrNull(1) ?: "Mon"
@@ -105,16 +140,128 @@ private fun BottomTabs(
     selectedRoute: String,
     onRouteSelected: (String) -> Unit
 ) {
-    NavigationBar {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         bottomDestinations.forEach { destination ->
+            val isSelected = destination.route == selectedRoute
             val label = stringResource(destination.labelRes)
-            NavigationBarItem(
-                selected = destination.route == selectedRoute,
-                onClick = { onRouteSelected(destination.route) },
-                icon = { Icon(imageVector = destination.icon, contentDescription = label) },
-                label = { Text(label) }
-            )
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { onRouteSelected(destination.route) }
+                    ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = destination.icon,
+                    contentDescription = label,
+                    tint = if (isSelected)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isSelected)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun TopBar(
+    currentRoute: String,
+    onNavigate: (String) -> Unit
+) {
+    val currentTitle = when (currentRoute) {
+        Routes.Home -> stringResource(Res.string.app_name)
+        Routes.Settings -> stringResource(Res.string.settings_title)
+        Routes.Nutrition -> stringResource(Res.string.nav_nutrition)
+        Routes.Chat -> stringResource(Res.string.chat_title)
+        Routes.Workout -> stringResource(Res.string.nav_workout)
+        Routes.Sleep -> stringResource(Res.string.nav_sleep)
+        Routes.Paywall -> stringResource(Res.string.paywall_title)
+        Routes.Progress -> stringResource(Res.string.nav_progress)
+        Routes.EditProfile -> stringResource(Res.string.edit_profile_title)
+        Routes.ShoppingList -> stringResource(Res.string.nutrition_tab_shopping)
+        else -> {
+            if (currentRoute.startsWith("nutrition_detail")) {
+                stringResource(Res.string.nutrition_detail_title)
+            } else {
+                stringResource(Res.string.app_name)
+            }
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TopBarIcon(Icons.Default.Chat, onClick = { onNavigate(Routes.Chat) })
+
+        if (currentRoute !in bottomNavRoutes) {
+            TopBarIcon(Icons.Default.ArrowBack, onClick = { onNavigate(Routes.Home) })
+        } else {
+            Spacer(modifier = Modifier.width(48.dp))
+        }
+
+        Spacer(Modifier.weight(1f))
+
+        Text(
+            text = currentTitle,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Spacer(Modifier.weight(1f))
+
+        TopBarIcon(Icons.Default.Star, onClick = { onNavigate(Routes.Paywall) })
+        TopBarIcon(Icons.Default.Settings, onClick = { onNavigate(Routes.Settings) })
+    }
+}
+
+@Composable
+private fun TopBarIcon(
+    imageVector: ImageVector,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick
+            )
+            .background(Color.Transparent),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = imageVector,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(24.dp)
+        )
     }
 }
 

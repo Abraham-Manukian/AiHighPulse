@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -54,13 +56,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.aihighpulse.core.designsystem.components.BrandScreen
-	import com.example.aihighpulse.core.designsystem.theme.AiPalette
-	import com.example.aihighpulse.shared.domain.model.Profile
-	import com.example.aihighpulse.ui.platform.SettingsPlatformActions
-	import com.example.aihighpulse.ui.platform.rememberSettingsPlatformActions
-	import com.example.aihighpulse.ui.util.kmpFormat
-	import org.jetbrains.compose.resources.stringResource
-	import kotlin.math.roundToInt
+import com.example.aihighpulse.core.designsystem.theme.AiPalette
+import com.example.aihighpulse.shared.domain.model.Profile
+import com.example.aihighpulse.ui.platform.SettingsPlatformActions
+import com.example.aihighpulse.ui.platform.rememberSettingsPlatformActions
+import com.example.aihighpulse.ui.util.kmpFormat
+import com.vtempe.ui.LocalBottomBarHeight
+import com.vtempe.ui.LocalTopBarHeight
+import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
 
 @Composable
 fun SettingsScreen(
@@ -70,6 +74,9 @@ fun SettingsScreen(
 ) {
     val state by presenter.state.collectAsState()
     val profile = state.profile
+    
+    val topBarHeight = LocalTopBarHeight.current
+    val bottomBarHeight = LocalBottomBarHeight.current
 
     if (profile == null) {
         LaunchedEffect(Unit) { presenter.refresh() }
@@ -91,9 +98,11 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 24.dp),
+                .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            Spacer(Modifier.height(topBarHeight + 16.dp))
+            
             AnimatedVisibility(
                 visible = true,
                 enter = fadeIn(animationSpec = tween(300)) + slideInVertically(initialOffsetY = { it / 5 }, animationSpec = tween(300))
@@ -129,17 +138,17 @@ fun SettingsScreen(
                                     fontWeight = FontWeight.Bold,
                                     color = contentColor
                                 )
-	                                Text(
-	                                    stringResource(Res.string.settings_age).kmpFormat(profile.age),
-	                                    color = contentColor.copy(alpha = 0.8f)
-	                                )
-	                                Text(
-	                                    stringResource(Res.string.settings_height_weight).kmpFormat(
-	                                        profile.heightCm,
-	                                        profile.weightKg
-	                                    ),
-	                                    color = contentColor.copy(alpha = 0.8f)
-	                                )
+                                Text(
+                                    stringResource(Res.string.settings_age).kmpFormat(profile.age),
+                                    color = contentColor.copy(alpha = 0.8f)
+                                )
+                                Text(
+                                    stringResource(Res.string.settings_height_weight).kmpFormat(
+                                        profile.heightCm,
+                                        profile.weightKg
+                                    ),
+                                    color = contentColor.copy(alpha = 0.8f)
+                                )
                             }
                         }
                         HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
@@ -203,6 +212,8 @@ fun SettingsScreen(
             ) {
                 Text("\u0417\u0430\u043d\u043e\u0432\u043e \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u044f", fontWeight = FontWeight.Bold)
             }
+            
+            Spacer(Modifier.height(bottomBarHeight + 16.dp))
         }
     }
 }
@@ -280,29 +291,29 @@ private fun ProfileStatsGrid(profile: Profile) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-	            ProfileStatPill(
-	                icon = Icons.Filled.Scale,
-	                label = stringResource(Res.string.settings_weight_label),
-	                value = stringResource(Res.string.settings_weight_value).kmpFormat(profile.weightKg),
-	                modifier = Modifier.weight(1f)
-	            )
-	            ProfileStatPill(
-	                icon = Icons.Filled.Straighten,
-	                label = stringResource(Res.string.settings_height_label),
-	                value = stringResource(Res.string.settings_height_value).kmpFormat(profile.heightCm),
-	                modifier = Modifier.weight(1f)
-	            )
+            ProfileStatPill(
+                icon = Icons.Filled.Scale,
+                label = stringResource(Res.string.settings_weight_label),
+                value = stringResource(Res.string.settings_weight_value).kmpFormat(profile.weightKg),
+                modifier = Modifier.weight(1f)
+            )
+            ProfileStatPill(
+                icon = Icons.Filled.Straighten,
+                label = stringResource(Res.string.settings_height_label),
+                value = stringResource(Res.string.settings_height_value).kmpFormat(profile.heightCm),
+                modifier = Modifier.weight(1f)
+            )
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-	            ProfileStatPill(
-	                icon = Icons.Filled.FitnessCenter,
-	                label = stringResource(Res.string.settings_experience_label),
-	                value = stringResource(Res.string.settings_experience_value).kmpFormat(profile.experienceLevel),
-	                modifier = Modifier.weight(1f)
-	            )
+            ProfileStatPill(
+                icon = Icons.Filled.FitnessCenter,
+                label = stringResource(Res.string.settings_experience_label),
+                value = stringResource(Res.string.settings_experience_value).kmpFormat(profile.experienceLevel),
+                modifier = Modifier.weight(1f)
+            )
             ProfileStatPill(
                 icon = Icons.Filled.Schedule,
                 label = stringResource(Res.string.settings_days_label),

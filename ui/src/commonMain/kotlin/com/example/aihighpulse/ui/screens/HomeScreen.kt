@@ -8,15 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
@@ -24,15 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Whatshot
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,6 +32,8 @@ import com.example.aihighpulse.core.designsystem.components.StatChip
 import com.example.aihighpulse.core.designsystem.theme.AiPalette
 import com.example.aihighpulse.ui.navigation.Routes
 import com.example.aihighpulse.ui.util.kmpFormat
+import com.vtempe.ui.LocalBottomBarHeight
+import com.vtempe.ui.LocalTopBarHeight
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -56,6 +42,10 @@ fun HomeScreen(
     presenter: HomePresenter = rememberHomePresenter()
 ) {
     val uiState by presenter.state.collectAsState()
+    
+    // Получаем динамическую высоту баров
+    val topBarHeight = LocalTopBarHeight.current
+    val bottomBarHeight = LocalBottomBarHeight.current
 
     BrandScreen(Modifier.fillMaxSize()) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -65,7 +55,14 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp)
+                // PaddingValues создают эффект: в начале и конце списка контент не под барами, 
+                // но при скролле он свободно уходит под них.
+                contentPadding = PaddingValues(
+                    top = topBarHeight + 16.dp, 
+                    bottom = bottomBarHeight + 32.dp,
+                    start = 20.dp,
+                    end = 20.dp
+                )
             ) {
                 item {
                     AnimatedVisibility(

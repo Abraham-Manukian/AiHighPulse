@@ -6,8 +6,10 @@ import com.example.aihighpulse.ui.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -33,6 +35,8 @@ import com.example.aihighpulse.core.designsystem.components.BrandScreen
 import com.example.aihighpulse.core.designsystem.theme.AiPalette
 import com.example.aihighpulse.shared.domain.model.Goal
 import com.example.aihighpulse.shared.domain.model.Profile
+import com.vtempe.ui.LocalBottomBarHeight
+import com.vtempe.ui.LocalTopBarHeight
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -47,6 +51,9 @@ fun EditProfileScreen(
     val height = remember { mutableStateOf("") }
     val weight = remember { mutableStateOf("") }
     val goal = remember { mutableStateOf(Goal.MAINTAIN) }
+    
+    val topBarHeight = LocalTopBarHeight.current
+    val bottomBarHeight = LocalBottomBarHeight.current
 
     LaunchedEffect(profile) {
         profile?.let {
@@ -76,9 +83,11 @@ fun EditProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(20.dp),
+                .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Spacer(Modifier.height(topBarHeight + 16.dp))
+            
             Text(
                 stringResource(Res.string.edit_profile_title),
                 style = MaterialTheme.typography.headlineMedium,
@@ -113,7 +122,7 @@ fun EditProfileScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(stringResource(Res.string.label_goal), color = Color(0xFF1C1C28), fontWeight = FontWeight.SemiBold)
-                    Goal.values().forEach { g ->
+                    Goal.entries.forEach { g ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -152,6 +161,8 @@ fun EditProfileScreen(
             ) {
                 Text(stringResource(Res.string.edit_profile_save), fontWeight = FontWeight.Bold)
             }
+            
+            Spacer(Modifier.height(bottomBarHeight + 32.dp))
         }
     }
 }

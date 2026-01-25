@@ -11,10 +11,14 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -28,13 +32,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-	import androidx.compose.ui.graphics.Color
-	import androidx.compose.ui.text.font.FontWeight
-	import androidx.compose.ui.unit.dp
-	import com.example.aihighpulse.core.designsystem.components.BrandScreen
-	import com.example.aihighpulse.ui.state.UiState
-	import com.example.aihighpulse.ui.util.kmpFormat
-	import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.example.aihighpulse.core.designsystem.components.BrandScreen
+import com.example.aihighpulse.ui.state.UiState
+import com.example.aihighpulse.ui.util.kmpFormat
+import com.vtempe.ui.LocalBottomBarHeight
+import com.vtempe.ui.LocalTopBarHeight
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun NutritionDetailScreen(
@@ -45,14 +51,21 @@ fun NutritionDetailScreen(
 ) {
     val state by presenter.state.collectAsState()
     val ui = state.ui
+    
+    val topBarHeight = LocalTopBarHeight.current
+    val bottomBarHeight = LocalBottomBarHeight.current
 
     BrandScreen(Modifier.fillMaxSize()) {
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(horizontal = 20.dp, vertical = 24.dp),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Отступ под "парящий" топ бар
+            Spacer(Modifier.height(topBarHeight + 16.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -116,19 +129,19 @@ fun NutritionDetailScreen(
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold
                                     )
-	                                    Text(
-	                                        stringResource(Res.string.nutrition_kcal_value).kmpFormat(meal.kcal),
-	                                        color = Color(0xFF323232),
-	                                        fontWeight = FontWeight.SemiBold
-	                                    )
-	                                    Text(
-	                                        stringResource(Res.string.nutrition_macros_detail).kmpFormat(
-	                                            meal.macros.proteinGrams,
-	                                            meal.macros.fatGrams,
-	                                            meal.macros.carbsGrams
-	                                        ),
-	                                        color = Color(0xFF3A3A3A)
-	                                    )
+                                    Text(
+                                        stringResource(Res.string.nutrition_kcal_value).kmpFormat(meal.kcal),
+                                        color = Color(0xFF323232),
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    Text(
+                                        stringResource(Res.string.nutrition_macros_detail).kmpFormat(
+                                            meal.macros.proteinGrams,
+                                            meal.macros.fatGrams,
+                                            meal.macros.carbsGrams
+                                        ),
+                                        color = Color(0xFF3A3A3A)
+                                    )
                                     Text(
                                         stringResource(Res.string.nutrition_ingredients),
                                         style = MaterialTheme.typography.titleMedium,
@@ -144,6 +157,9 @@ fun NutritionDetailScreen(
                     }
                 }
             }
+            
+            // Отступ под "парящий" боттом бар
+            Spacer(Modifier.height(bottomBarHeight + 32.dp))
         }
     }
 }
