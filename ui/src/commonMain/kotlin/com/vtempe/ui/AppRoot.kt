@@ -1,4 +1,4 @@
-package com.vtempe.ui
+﻿package com.vtempe.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,23 +19,23 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.aihighpulse.core.designsystem.icons.AiIcons
-import com.example.aihighpulse.ui.navigation.Routes
-import com.example.aihighpulse.ui.navigation.nutritionDetail
-import com.example.aihighpulse.ui.screens.*
-import com.example.aihighpulse.ui.theme.AiHighPulseTheme
-import com.example.aihighpulse.ui.*
-import com.example.aihighpulse.ui.navigation.Routes.bottomNavRoutes
+import com.vtempe.core.designsystem.icons.AiIcons
+import com.vtempe.ui.navigation.Routes
+import com.vtempe.ui.navigation.nutritionDetail
+import com.vtempe.ui.screens.*
+import com.vtempe.ui.theme.VTempeTheme
+import com.vtempe.ui.*
+import com.vtempe.ui.navigation.Routes.bottomNavRoutes
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-// Глобальные провайдеры для высот баров, чтобы использовать в экранах
+// Р“Р»РѕР±Р°Р»СЊРЅС‹Рµ РїСЂРѕРІР°Р№РґРµСЂС‹ РґР»СЏ РІС‹СЃРѕС‚ Р±Р°СЂРѕРІ, С‡С‚РѕР±С‹ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РІ СЌРєСЂР°РЅР°С…
 val LocalTopBarHeight = compositionLocalOf { 0.dp }
 val LocalBottomBarHeight = compositionLocalOf { 0.dp }
 
 @Composable
 fun AppRoot() {
-    AiHighPulseTheme {
+    VTempeTheme {
         var currentRoute by remember { mutableStateOf(Routes.Home) }
         val tabRoutes = bottomDestinations.map { it.route }
         val isTabRoute = currentRoute in tabRoutes
@@ -44,7 +44,7 @@ fun AppRoot() {
         var topBarHeight by remember { mutableStateOf(0.dp) }
         var bottomBarHeight by remember { mutableStateOf(0.dp) }
 
-        // Пробрасываем высоты баров вниз по дереву
+        // РџСЂРѕР±СЂР°СЃС‹РІР°РµРј РІС‹СЃРѕС‚С‹ Р±Р°СЂРѕРІ РІРЅРёР· РїРѕ РґРµСЂРµРІСѓ
         CompositionLocalProvider(
             LocalTopBarHeight provides topBarHeight,
             LocalBottomBarHeight provides bottomBarHeight
@@ -278,3 +278,5 @@ private val bottomDestinations = listOf(
     BottomDestination(Routes.Sleep, Res.string.nav_sleep, AiIcons.Sleep),
     BottomDestination(Routes.Progress, Res.string.nav_progress, AiIcons.Progress)
 )
+
+

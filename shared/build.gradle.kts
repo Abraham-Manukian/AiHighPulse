@@ -1,3 +1,5 @@
+﻿import app.cash.sqldelight.gradle.VerifyMigrationTask
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.compose)
@@ -64,7 +66,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.example.aihighpulse.shared"
+    namespace = "com.vtempe.shared"
     compileSdk = 36
     defaultConfig {
         minSdk = 24
@@ -78,8 +80,12 @@ android {
 sqldelight {
     databases {
         create("AppDatabase") {
-            packageName.set("com.example.aihighpulse.shared.db")
+            packageName.set("com.vtempe.shared.db")
             verifyMigrations.set(false)
         }
     }
+}
+// Windows CI/local builds can fail loading sqlite native libs for verification.
+tasks.withType<VerifyMigrationTask>().configureEach {
+    enabled = false
 }

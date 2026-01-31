@@ -1,4 +1,4 @@
-plugins {
+﻿plugins {
     kotlin("jvm")
     alias(libs.plugins.kotlin.serialization)
     application
@@ -23,5 +23,6 @@ kotlin {
 }
 
 application {
-    mainClass.set("com.example.aihighpulse.server.ApplicationKt")
+    mainClass.set("com.vtempe.server.ApplicationKt")
 }
+

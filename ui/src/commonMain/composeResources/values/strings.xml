@@ -1,5 +1,5 @@
 ﻿<resources>
-    <string name="app_name">V TEMPE</string>
+    <string name="app_name">V-Tempe</string>
 
     <!-- Navigation -->
     <string name="nav_home">Home</string>
@@ -38,7 +38,7 @@
     <string name="day_sun_short">Sun</string>
 
     <!-- Onboarding -->
-    <string name="onboard_title">Welcome to AiHighPulse</string>
+    <string name="onboard_title">Welcome to V-Tempe</string>
     <string name="onboard_subtitle">Smart training, nutrition and sleep tailored to your goals.</string>
     <string name="onboard_cta">Save and start</string>
     <string name="onboard_step_counter">Step %1$d of %2$d</string>
@@ -192,3 +192,5 @@
     <string name="chat_hint">Ask your coach…</string>
     <string name="chat_send">Send</string>
 </resources>
+
+

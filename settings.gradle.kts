@@ -1,4 +1,4 @@
-pluginManagement {
+﻿pluginManagement {
     repositories {
         google {
             content {
@@ -20,7 +20,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AiHighPulse"
+rootProject.name = "V-Tempe"
 include(":shared")
 include(":app-android")
 include(":app-ios")

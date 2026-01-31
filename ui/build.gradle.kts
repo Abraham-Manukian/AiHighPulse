@@ -1,4 +1,4 @@
-plugins {
+﻿plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.compose)
@@ -65,11 +65,11 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "com.example.aihighpulse.ui"
+    packageOfResClass = "com.vtempe.ui"
 }
 
 android {
-    namespace = "com.example.aihighpulse.ui"
+    namespace = "com.vtempe.ui"
     compileSdk = 36
 
     defaultConfig {
@@ -85,3 +85,4 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 }
+

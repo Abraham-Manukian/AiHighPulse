@@ -1,4 +1,4 @@
-plugins {
+﻿plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.compose)
@@ -47,7 +47,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.example.aihighpulse.core.designsystem"
+    namespace = "com.vtempe.core.designsystem"
     compileSdk = 36
 
     defaultConfig {
@@ -61,3 +61,4 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 }
+

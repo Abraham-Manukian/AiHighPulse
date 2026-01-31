@@ -1,4 +1,4 @@
-plugins {
+﻿plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.aihighpulse"
+    namespace = "com.vtempe"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.aihighpulse"
+        applicationId = "com.vtempe"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -62,3 +62,4 @@ dependencies {
     // Billing
     implementation(libs.play.billing)
 }
+
