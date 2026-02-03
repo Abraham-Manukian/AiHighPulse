@@ -33,7 +33,7 @@ fun SplashScreen(onReady: (String) -> Unit = {}) {
         Box(
             Modifier
                 .fillMaxSize()
-                .background(AiGradients.purpleWave()),
+                .background(AiGradients.lavenderMist()),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
@@ -47,4 +47,3 @@ fun SplashScreen(onReady: (String) -> Unit = {}) {
 }
 
 expect suspend fun determineStartDestination(): String
-

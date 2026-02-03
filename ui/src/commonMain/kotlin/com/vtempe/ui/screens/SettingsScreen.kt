@@ -1,31 +1,28 @@
-﻿@file:OptIn(org.jetbrains.compose.resources.ExperimentalResourceApi::class)
+﻿@file:OptIn(
+    org.jetbrains.compose.resources.ExperimentalResourceApi::class,
+    androidx.compose.foundation.layout.ExperimentalLayoutApi::class
+)
 
 package com.vtempe.ui.screens
 import com.vtempe.ui.*
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Person
@@ -44,19 +41,18 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.vtempe.core.designsystem.components.BrandScreen
 import com.vtempe.core.designsystem.theme.AiPalette
+import com.vtempe.core.designsystem.theme.AppThemeColor
 import com.vtempe.shared.domain.model.Profile
 import com.vtempe.ui.platform.SettingsPlatformActions
 import com.vtempe.ui.platform.rememberSettingsPlatformActions
@@ -77,6 +73,8 @@ fun SettingsScreen(
     
     val topBarHeight = LocalTopBarHeight.current
     val bottomBarHeight = LocalBottomBarHeight.current
+
+    var showColors by remember { mutableStateOf(false) }
 
     if (profile == null) {
         LaunchedEffect(Unit) { presenter.refresh() }
@@ -158,21 +156,71 @@ fun SettingsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             shape = MaterialTheme.shapes.medium
                         ) { Text(stringResource(Res.string.settings_edit_profile)) }
-                        Row(
+                    }
+                }
+            }
+
+            PreferenceCard(
+                title = "\u0426\u0432\u0435\u0442\u043e\u0432\u0430\u044f \u0442\u0435\u043c\u0430",
+                onClick = { showColors = !showColors },
+                trailing = {
+                    val rotation by animateFloatAsState(if (showColors) 180f else 0f)
+                    Icon(
+                        Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        modifier = Modifier.rotate(rotation)
+                    )
+                }
+            ) {
+                AnimatedVisibility(visible = showColors) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            OutlinedButton(
-                                onClick = { presenter.save(profile.copy(weightKg = profile.weightKg + 0.5)) },
-                                modifier = Modifier.weight(1f),
-                                shape = MaterialTheme.shapes.medium
-                            ) { Text(stringResource(Res.string.settings_inc_weight)) }
-                            OutlinedButton(
-                                onClick = { presenter.save(profile.copy(weightKg = profile.weightKg - 0.5)) },
-                                modifier = Modifier.weight(1f),
-                                shape = MaterialTheme.shapes.medium
-                            ) { Text(stringResource(Res.string.settings_dec_weight)) }
+                            AppThemeColor.entries.forEach { themeColor ->
+                                val isSelected = AiPalette.CurrentPrimary == themeColor.primary
+                                Box(
+                                    modifier = Modifier
+                                        .size(44.dp)
+                                        .clip(CircleShape)
+                                        .background(themeColor.primary)
+                                        .clickable {
+                                            AiPalette.CurrentPrimary = themeColor.primary
+                                            AiPalette.CurrentDeep = themeColor.deep
+                                            AiPalette.CurrentLight = themeColor.light
+                                        }
+                                        .border(
+                                            width = if (isSelected) 3.dp else 1.dp,
+                                            color = if (isSelected) AiPalette.OnGradient else Color.Black.copy(alpha = 0.1f),
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isSelected) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Check,
+                                            contentDescription = null,
+                                            tint = Color.White,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                            }
                         }
+                    }
+                }
+                
+                if (!showColors) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                         Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(AiPalette.Primary)
+                        )
+                        Text("\u0412\u044b\u0431\u0440\u0430\u0442\u044c \u0434\u0440\u0443\u0433\u043e\u0439 \u0446\u0432\u0435\u0442", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -221,10 +269,14 @@ fun SettingsScreen(
 @Composable
 private fun PreferenceCard(
     title: String,
+    onClick: (() -> Unit)? = null,
+    trailing: @Composable (RowScope.() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         colors = settingsCardColors(),
         elevation = settingsCardElevation(),
         shape = MaterialTheme.shapes.large
@@ -233,12 +285,19 @@ private fun PreferenceCard(
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = AiPalette.OnGradient
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = AiPalette.OnGradient
+                )
+                trailing?.invoke(this)
+            }
             content()
         }
     }
@@ -385,4 +444,3 @@ private fun ProfileStatPill(
         }
     }
 }
-

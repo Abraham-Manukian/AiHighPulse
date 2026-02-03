@@ -29,18 +29,27 @@ class AskAiTrainer(
         userMessage: String,
         localeOverride: String? = null
     ): DataResult<CoachResponse> {
-        val profile = profileRepository.getProfile() ?: error("Profile required")
+
+        val profile = profileRepository.getProfile()
+            ?: return DataResult.Failure(
+                reason = DataResult.Reason.Unknown,
+                message = "Profile required. Please complete onboarding first."
+            )
+
         val locale = localeOverride ?: preferencesRepository.getLanguageTag()
         val result = chatRepository.send(profile, history, userMessage, locale)
+
         return when (result) {
             is DataResult.Success -> {
                 val hasCoachUpdates =
                     result.data.trainingPlan != null ||
-                        result.data.nutritionPlan != null ||
-                        result.data.sleepAdvice != null
+                            result.data.nutritionPlan != null ||
+                            result.data.sleepAdvice != null
+
                 result.data.trainingPlan?.let { trainingRepository.savePlan(it) }
                 result.data.nutritionPlan?.let { nutritionRepository.savePlan(it) }
                 result.data.sleepAdvice?.let { adviceRepository.saveAdvice("sleep", it) }
+
                 if (hasCoachUpdates) {
                     aiResponseCache.markBundleFresh(
                         version = CoachDataFreshness.SCHEMA_VERSION,
@@ -49,6 +58,7 @@ class AskAiTrainer(
                 }
                 result
             }
+
             is DataResult.Failure -> {
                 Napier.w(
                     message = "Chat send failed: ${result.reason} ${result.message.orEmpty()}",
@@ -58,6 +68,7 @@ class AskAiTrainer(
             }
         }
     }
+
 }
 
 

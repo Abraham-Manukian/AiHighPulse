@@ -1,4 +1,4 @@
-﻿package com.vtempe.ui
+package com.vtempe.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,22 +29,23 @@ import com.vtempe.ui.navigation.Routes.bottomNavRoutes
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
-// Р“Р»РѕР±Р°Р»СЊРЅС‹Рµ РїСЂРѕРІР°Р№РґРµСЂС‹ РґР»СЏ РІС‹СЃРѕС‚ Р±Р°СЂРѕРІ, С‡С‚РѕР±С‹ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РІ СЌРєСЂР°РЅР°С…
+// Глобальные провайдеры для высот баров, чтобы использовать в экранах
 val LocalTopBarHeight = compositionLocalOf { 0.dp }
 val LocalBottomBarHeight = compositionLocalOf { 0.dp }
 
 @Composable
 fun AppRoot() {
     VTempeTheme {
-        var currentRoute by remember { mutableStateOf(Routes.Home) }
+        var currentRoute by remember { mutableStateOf(Routes.Onboarding) }
         val tabRoutes = bottomDestinations.map { it.route }
         val isTabRoute = currentRoute in tabRoutes
+        val showTopBar = currentRoute != Routes.Onboarding && currentRoute != Routes.Splash
 
         val density = LocalDensity.current
         var topBarHeight by remember { mutableStateOf(0.dp) }
         var bottomBarHeight by remember { mutableStateOf(0.dp) }
 
-        // РџСЂРѕР±СЂР°СЃС‹РІР°РµРј РІС‹СЃРѕС‚С‹ Р±Р°СЂРѕРІ РІРЅРёР· РїРѕ РґРµСЂРµРІСѓ
+        // Пробрасываем высоты баров вниз по дереву
         CompositionLocalProvider(
             LocalTopBarHeight provides topBarHeight,
             LocalBottomBarHeight provides bottomBarHeight
@@ -65,17 +66,21 @@ fun AppRoot() {
                 }
 
                 // Top Bar
-                GlassTopBarContainer(
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .onGloballyPositioned { coords ->
-                            topBarHeight = with(density) { coords.size.height.toDp() }
-                        }
-                ) {
-                    TopBar(
-                        currentRoute = currentRoute,
-                        onNavigate = { currentRoute = it }
-                    )
+                if (showTopBar) {
+                    GlassTopBarContainer(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .onGloballyPositioned { coords ->
+                                topBarHeight = with(density) { coords.size.height.toDp() }
+                            }
+                    ) {
+                        TopBar(
+                            currentRoute = currentRoute,
+                            onNavigate = { currentRoute = it }
+                        )
+                    }
+                } else if (topBarHeight != 0.dp) {
+                    topBarHeight = 0.dp
                 }
 
                 // Bottom Bar

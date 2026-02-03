@@ -1,4 +1,4 @@
-﻿plugins {
+plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.compose)
@@ -22,7 +22,9 @@ kotlin {
                 api(compose.foundation)
                 api(compose.ui)
                 api(compose.material3)
+                api(compose.components.resources)
             }
+            kotlin.srcDirs("build/generated/compose/resourceGenerator/kotlin/commonMainResourceAccessors")
         }
         val commonTest by getting {
             dependencies { implementation(libs.kotlin.test) }
@@ -33,7 +35,9 @@ kotlin {
                 api(compose.foundation)
                 api(compose.ui)
                 api(compose.material3)
+                api(compose.components.resources)
             }
+            kotlin.srcDirs("build/generated/compose/resourceGenerator/kotlin/androidMainResourceAccessors")
         }
         val iosMain by getting {
             dependencies {
@@ -41,6 +45,7 @@ kotlin {
                 api(compose.foundation)
                 api(compose.ui)
                 api(compose.material3)
+                api(compose.components.resources)
             }
         }
     }
@@ -61,4 +66,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 }
-
+compose.resources {
+    packageOfResClass = "com.vtempe.core.designsystem"
+    publicResClass = true
+}

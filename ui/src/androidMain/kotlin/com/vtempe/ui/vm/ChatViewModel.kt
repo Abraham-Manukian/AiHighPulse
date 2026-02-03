@@ -42,14 +42,21 @@ class ChatViewModel(private val ask: AskAiTrainer) : ViewModel(), ChatPresenter 
 
         viewModelScope.launch {
             val localeTag = LocaleListCompat.getAdjustedDefault().get(0)?.toLanguageTag()
-            when (val result = ask(history, trimmed, localeTag)) {
+
+            val result = runCatching { ask(history, trimmed, localeTag) }
+                .getOrElse { throwable ->
+                    DataResult.Failure(
+                        reason = DataResult.Reason.Unknown,
+                        message = throwable.message ?: "Unable to send your message.",
+                        throwable = throwable
+                    )
+                }
+
+            when (result) {
                 is DataResult.Success -> {
                     _state.update { current ->
                         current.copy(
-                            messages = current.messages + ChatMessage(
-                                "assistant",
-                                result.data.reply
-                            ),
+                            messages = current.messages + ChatMessage("assistant", result.data.reply),
                             sendState = ChatSendState.Success
                         )
                     }
@@ -64,12 +71,11 @@ class ChatViewModel(private val ask: AskAiTrainer) : ViewModel(), ChatPresenter 
                         DataResult.Reason.CacheMissing -> "No cached response is available."
                         DataResult.Reason.Unknown -> "Unable to send your message."
                     }
-                    _state.update {
-                        it.copy(sendState = ChatSendState.Error(message))
-                    }
+                    _state.update { it.copy(sendState = ChatSendState.Error(message)) }
                 }
             }
         }
+
     }
 }
 

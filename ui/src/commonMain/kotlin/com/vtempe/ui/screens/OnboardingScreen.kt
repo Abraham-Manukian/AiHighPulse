@@ -5,8 +5,8 @@
 )
 
 package com.vtempe.ui.screens
-import com.vtempe.ui.*
 
+import com.vtempe.ui.*
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -40,9 +40,10 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -50,14 +51,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-	import androidx.compose.ui.text.font.FontWeight
-	import androidx.compose.ui.unit.dp
-	import com.vtempe.core.designsystem.components.BrandScreen
-	import com.vtempe.core.designsystem.theme.AiPalette
-	import com.vtempe.shared.domain.model.Goal
-	import com.vtempe.shared.domain.model.Sex
-	import com.vtempe.ui.util.kmpFormat
-	import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.vtempe.core.designsystem.components.BrandScreen
+import com.vtempe.core.designsystem.theme.AiPalette
+import com.vtempe.shared.domain.model.Goal
+import com.vtempe.shared.domain.model.Sex
+import com.vtempe.ui.util.kmpFormat
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun OnboardingScreen(
@@ -92,19 +93,16 @@ fun OnboardingScreen(
         "ru-RU" to stringResource(Res.string.language_ru)
     )
 
-    val glassBg = Color.White.copy(alpha = 0.18f)
-    val glassBorder = Color.White.copy(alpha = 0.35f)
-    val inputColors = TextFieldDefaults.colors(
-        focusedIndicatorColor = glassBorder,
-        unfocusedIndicatorColor = glassBorder.copy(alpha = 0.6f),
-        cursorColor = Color.White,
-        focusedLabelColor = Color.White,
-        unfocusedLabelColor = Color.White.copy(alpha = 0.85f),
-        focusedTextColor = Color.White,
-        unfocusedTextColor = Color.White,
-        disabledTextColor = Color.White.copy(alpha = 0.6f),
-        focusedPlaceholderColor = Color.White.copy(alpha = 0.7f),
-        unfocusedPlaceholderColor = Color.White.copy(alpha = 0.7f)
+    val inputColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = AiPalette.Primary,
+        unfocusedBorderColor = AiPalette.Outline.copy(alpha = 0.25f),
+        cursorColor = AiPalette.Primary,
+        focusedLabelColor = AiPalette.Primary,
+        unfocusedLabelColor = AiPalette.OnGradient.copy(alpha = 0.5f),
+        focusedTextColor = AiPalette.OnGradient,
+        unfocusedTextColor = AiPalette.OnGradient,
+        focusedContainerColor = Color.White,
+        unfocusedContainerColor = AiPalette.SurfaceLight.copy(alpha = 0.4f)
     )
 
     val progress = (state.currentStep + 1).toFloat() / ONBOARDING_TOTAL_STEPS.toFloat()
@@ -120,208 +118,211 @@ fun OnboardingScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Text(
-                stringResource(Res.string.onboard_title),
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            Text(stringResource(Res.string.onboard_subtitle), color = Color.White.copy(alpha = 0.85f))
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    stringResource(Res.string.onboard_title),
+                    style = MaterialTheme.typography.displayLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    stringResource(Res.string.onboard_subtitle),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White.copy(alpha = 0.9f)
+                )
+            }
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-	                Text(
-	                    text = stringResource(Res.string.onboard_step_counter).kmpFormat(
-	                        state.currentStep + 1,
-	                        ONBOARDING_TOTAL_STEPS
-	                    ),
-	                    color = Color.White.copy(alpha = 0.8f),
-	                    style = MaterialTheme.typography.bodyMedium,
-	                )
+                Text(
+                    text = stringResource(Res.string.onboard_step_counter).kmpFormat(
+                        state.currentStep + 1,
+                        ONBOARDING_TOTAL_STEPS
+                    ),
+                    color = Color.White.copy(alpha = 0.9f),
+                    style = MaterialTheme.typography.labelLarge,
+                )
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(10.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    trackColor = Color.White.copy(alpha = 0.15f),
-                    color = AiPalette.DeepAccent
+                        .clip(CircleShape),
+                    trackColor = Color.White.copy(alpha = 0.25f),
+                    color = AiPalette.PrimaryBright
                 )
             }
 
-            Crossfade(targetState = state.currentStep, label = "onboarding_steps") { step ->
-                when (step) {
-                    0 -> StepCard {
-                        Text(stringResource(Res.string.label_language), style = MaterialTheme.typography.titleMedium, color = Color.White)
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            languageOptions.forEach { (tag, label) ->
-                                FilterChip(
-                                    selected = state.languageTag == tag,
-                                    onClick = { presenter.setLanguage(tag) },
-                                    label = { Text(label) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = glassBg,
-                                        selectedLabelColor = Color.White,
-                                        containerColor = glassBg.copy(alpha = 0.12f),
-                                        labelColor = Color.White
-                                    ),
-                                    border = null
-                                )
-                            }
-                        }
-                    }
-
-                    1 -> StepCard {
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            OutlinedTextField(
-                                value = state.age,
-                                onValueChange = { v -> presenter.update { st -> st.copy(age = v.filter { it.isDigit() }.take(2)) } },
-                                label = { Text(stringResource(Res.string.label_age)) },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(glassBg),
-                                colors = inputColors
-                            )
-                            OutlinedTextField(
-                                value = state.heightCm,
-                                onValueChange = { v -> presenter.update { st -> st.copy(heightCm = v.filter { it.isDigit() }.take(3)) } },
-                                label = { Text(stringResource(Res.string.label_height_cm)) },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(glassBg),
-                                colors = inputColors
-                            )
-                            OutlinedTextField(
-                                value = state.weightKg,
-                                onValueChange = { v -> presenter.update { st -> st.copy(weightKg = v.filter { it.isDigit() || it == '.' }.take(5)) } },
-                                label = { Text(stringResource(Res.string.label_weight_kg)) },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(glassBg),
-                                colors = inputColors
-                            )
-                        }
-
-                        Text(stringResource(Res.string.label_sex), color = Color.White)
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            listOf(Sex.MALE, Sex.FEMALE, Sex.OTHER).forEach { option ->
-                                val label = when (option) {
-                                    Sex.MALE -> stringResource(Res.string.sex_male)
-                                    Sex.FEMALE -> stringResource(Res.string.sex_female)
-                                    Sex.OTHER -> stringResource(Res.string.sex_other)
+            Crossfade(
+                targetState = state.currentStep,
+                label = "onboarding_steps",
+                modifier = Modifier.fillMaxWidth()
+            ) { step ->
+                StepCard {
+                    when (step) {
+                        0 -> {
+                            StepTitle(stringResource(Res.string.label_language))
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                languageOptions.forEach { (tag, label) ->
+                                    ModernChip(
+                                        selected = state.languageTag == tag,
+                                        label = label,
+                                        onClick = { presenter.setLanguage(tag) }
+                                    )
                                 }
-                                FilterChip(
-                                    selected = state.sex == option,
-                                    onClick = { presenter.update { it.copy(sex = option) } },
-                                    label = { Text(label) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = glassBg,
-                                        selectedLabelColor = Color.White,
-                                        containerColor = glassBg.copy(alpha = 0.12f),
-                                        labelColor = Color.White
-                                    ),
-                                    border = null
-                                )
                             }
                         }
-                    }
 
-                    2 -> StepCard {
-                        Text(stringResource(Res.string.label_goal), style = MaterialTheme.typography.titleMedium, color = Color.White)
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Goal.values().forEach { goal ->
-                                val label = when (goal) {
-                                    Goal.LOSE_FAT -> stringResource(Res.string.goal_lose_fat)
-                                    Goal.MAINTAIN -> stringResource(Res.string.goal_maintain)
-                                    Goal.GAIN_MUSCLE -> stringResource(Res.string.goal_gain_muscle)
+                        1 -> {
+                            StepTitle(stringResource(Res.string.settings_title))
+                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                OutlinedTextField(
+                                    value = state.age,
+                                    onValueChange = { v -> presenter.update { st -> st.copy(age = v.filter { it.isDigit() }.take(2)) } },
+                                    label = { Text(stringResource(Res.string.label_age)) },
+                                    modifier = Modifier.weight(1f),
+                                    shape = MaterialTheme.shapes.medium,
+                                    colors = inputColors
+                                )
+                                OutlinedTextField(
+                                    value = state.heightCm,
+                                    onValueChange = { v -> presenter.update { st -> st.copy(heightCm = v.filter { it.isDigit() }.take(3)) } },
+                                    label = { Text(stringResource(Res.string.label_height_cm)) },
+                                    modifier = Modifier.weight(1f),
+                                    shape = MaterialTheme.shapes.medium,
+                                    colors = inputColors
+                                )
+                                OutlinedTextField(
+                                    value = state.weightKg,
+                                    onValueChange = { v -> presenter.update { st -> st.copy(weightKg = v.filter { it.isDigit() || it == '.' }.take(5)) } },
+                                    label = { Text(stringResource(Res.string.label_weight_kg)) },
+                                    modifier = Modifier.weight(1f),
+                                    shape = MaterialTheme.shapes.medium,
+                                    colors = inputColors
+                                )
+                            }
+
+                            Text(
+                                stringResource(Res.string.label_sex),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = AiPalette.OnGradient
+                            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Sex.entries.forEach { option ->
+                                    val label = when (option) {
+                                        Sex.MALE -> stringResource(Res.string.sex_male)
+                                        Sex.FEMALE -> stringResource(Res.string.sex_female)
+                                        Sex.OTHER -> stringResource(Res.string.sex_other)
+                                    }
+                                    ModernChip(
+                                        selected = state.sex == option,
+                                        label = label,
+                                        onClick = { presenter.update { it.copy(sex = option) } }
+                                    )
                                 }
-                                FilterChip(
-                                    selected = state.goal == goal,
-                                    onClick = { presenter.update { it.copy(goal = goal) } },
-                                    label = { Text(label) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = glassBg,
-                                        selectedLabelColor = Color.White,
-                                        containerColor = glassBg.copy(alpha = 0.12f),
-                                        labelColor = Color.White
-                                    ),
-                                    border = null
-                                )
                             }
                         }
-	                        Text(
-	                            stringResource(Res.string.label_experience).kmpFormat(state.experienceLevel),
-	                            color = Color.White
-	                        )
-                        Slider(
-                            value = state.experienceLevel.toFloat(),
-                            onValueChange = { lvl -> presenter.update { it.copy(experienceLevel = lvl.toInt().coerceIn(1, 5)) } },
-                            valueRange = 1f..5f,
-                            steps = 3
-                        )
-                    }
 
-                    3 -> StepCard {
-                        Text(stringResource(Res.string.label_equipment_presets), style = MaterialTheme.typography.titleMedium, color = Color.White)
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            equipmentOptions.forEach { option ->
-                                ChipToggle(
-                                    label = option,
-                                    selected = state.selectedEquipment.contains(option),
-                                    onClick = { presenter.toggleEquipment(option) }
-                                )
+                        2 -> {
+                            StepTitle(stringResource(Res.string.label_goal))
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Goal.entries.forEach { goal ->
+                                    val label = when (goal) {
+                                        Goal.LOSE_FAT -> stringResource(Res.string.goal_lose_fat)
+                                        Goal.MAINTAIN -> stringResource(Res.string.goal_maintain)
+                                        Goal.GAIN_MUSCLE -> stringResource(Res.string.goal_gain_muscle)
+                                    }
+                                    ModernChip(
+                                        selected = state.goal == goal,
+                                        label = label,
+                                        onClick = { presenter.update { it.copy(goal = goal) } }
+                                    )
+                                }
                             }
-                        }
-                        OutlinedTextField(
-                            value = state.customEquipment,
-                            onValueChange = { presenter.setCustomEquipment(it) },
-                            label = { Text(stringResource(Res.string.label_equipment_manual)) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(glassBg),
-                            colors = inputColors
-                        )
-                    }
-
-                    4 -> StepCard {
-                        Text(stringResource(Res.string.label_dietary_prefs), color = Color.White)
-                        OutlinedTextField(
-                            value = state.dietaryPreferences,
-                            onValueChange = { presenter.update { st -> st.copy(dietaryPreferences = it) } },
-                            label = { Text(stringResource(Res.string.label_dietary_prefs)) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(glassBg),
-                            colors = inputColors
-                        )
-                        OutlinedTextField(
-                            value = state.allergies,
-                            onValueChange = { presenter.update { st -> st.copy(allergies = it) } },
-                            label = { Text(stringResource(Res.string.label_allergies)) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(glassBg),
-                            colors = inputColors
-                        )
-                    }
-
-                    else -> StepCard {
-                        Text(stringResource(Res.string.label_weekdays), style = MaterialTheme.typography.titleMedium, color = Color.White)
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            dayLabels.forEach { (day, label) ->
-                                val selected = state.days[day] == true
-                                ChipToggle(
-                                    label = label,
-                                    selected = selected,
-                                    onClick = { presenter.update { st -> st.copy(days = st.days + (day to !selected)) } }
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                stringResource(Res.string.label_experience).kmpFormat(state.experienceLevel),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = AiPalette.OnGradient
+                            )
+                            Slider(
+                                value = state.experienceLevel.toFloat(),
+                                onValueChange = { lvl -> presenter.update { it.copy(experienceLevel = lvl.toInt().coerceIn(1, 5)) } },
+                                valueRange = 1f..5f,
+                                steps = 3,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = AiPalette.Primary,
+                                    activeTrackColor = AiPalette.Primary,
+                                    inactiveTrackColor = AiPalette.Primary.copy(alpha = 0.2f)
                                 )
+                            )
+                        }
+
+                        3 -> {
+                            StepTitle(stringResource(Res.string.label_equipment_presets))
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                equipmentOptions.forEach { option ->
+                                    ModernToggleChip(
+                                        label = option,
+                                        selected = state.selectedEquipment.contains(option),
+                                        onClick = { presenter.toggleEquipment(option) }
+                                    )
+                                }
+                            }
+                            OutlinedTextField(
+                                value = state.customEquipment,
+                                onValueChange = { presenter.setCustomEquipment(it) },
+                                label = { Text(stringResource(Res.string.label_equipment_manual)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = MaterialTheme.shapes.medium,
+                                colors = inputColors
+                            )
+                        }
+
+                        4 -> {
+                            StepTitle(stringResource(Res.string.label_dietary_prefs))
+                            OutlinedTextField(
+                                value = state.dietaryPreferences,
+                                onValueChange = { presenter.update { st -> st.copy(dietaryPreferences = it) } },
+                                label = { Text(stringResource(Res.string.label_dietary_prefs)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = MaterialTheme.shapes.medium,
+                                colors = inputColors
+                            )
+                            OutlinedTextField(
+                                value = state.allergies,
+                                onValueChange = { presenter.update { st -> st.copy(allergies = it) } },
+                                label = { Text(stringResource(Res.string.label_allergies)) },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = MaterialTheme.shapes.medium,
+                                colors = inputColors
+                            )
+                        }
+
+                        else -> {
+                            StepTitle(stringResource(Res.string.label_weekdays))
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                dayLabels.forEach { (day, label) ->
+                                    val selected = state.days[day] == true
+                                    ModernToggleChip(
+                                        label = label,
+                                        selected = selected,
+                                        onClick = { presenter.update { st -> st.copy(days = st.days + (day to !selected)) } }
+                                    )
+                                }
                             }
                         }
                     }
@@ -330,87 +331,122 @@ fun OnboardingScreen(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (state.currentStep > 0) {
                     OutlinedButton(
                         onClick = { presenter.prevStep() },
                         enabled = !state.saving,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).height(56.dp),
+                        shape = MaterialTheme.shapes.large,
                         colors = ButtonDefaults.outlinedButtonColors(
-                            containerColor = Color.White.copy(alpha = 0.08f),
                             contentColor = Color.White
                         ),
-                        border = BorderStroke(1.dp, glassBorder)
-                    ) { Text(stringResource(Res.string.action_back)) }
-                } else {
-                    Spacer(modifier = Modifier.weight(1f))
+                        border = BorderStroke(2.dp, Color.White.copy(alpha = 0.5f))
+                    ) { Text(stringResource(Res.string.action_back), fontWeight = FontWeight.Bold) }
                 }
+
                 Button(
                     onClick = {
                         if (isLastStep) presenter.save(onDone) else presenter.nextStep()
                     },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1.5f).height(56.dp),
                     enabled = !state.saving,
                     shape = MaterialTheme.shapes.large,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = AiPalette.DeepAccent,
                         contentColor = Color.White
-                    )
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
                 ) {
-                    Text(if (isLastStep) stringResource(Res.string.onboard_cta) else stringResource(Res.string.action_next))
+                    Text(
+                        if (isLastStep) stringResource(Res.string.onboard_cta) else stringResource(Res.string.action_next),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
 
             if (state.saving) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    CircularProgressIndicator(modifier = Modifier.size(22.dp), color = Color.White)
-                    Text(text = stringResource(Res.string.settings_saving), color = Color.White.copy(alpha = 0.85f))
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
+                    Spacer(Modifier.size(12.dp))
+                    Text(text = stringResource(Res.string.settings_saving), color = Color.White)
                 }
             }
+            
+            Spacer(Modifier.height(32.dp))
         }
     }
 }
 
 @Composable
+private fun StepTitle(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.Bold,
+        color = AiPalette.OnGradient,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
+}
+
+@Composable
 private fun StepCard(content: @Composable ColumnScope.() -> Unit) {
     Card(
-        colors = onboardingCardColors(),
-        elevation = onboardingCardElevation(),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.98f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         shape = MaterialTheme.shapes.extraLarge,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             content()
         }
     }
 }
 
 @Composable
-private fun ChipToggle(label: String, selected: Boolean, onClick: () -> Unit) {
-    val background = if (selected) Color.White.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.06f)
-    val borderColor = Color.White.copy(alpha = if (selected) 0.55f else 0.2f)
-    Box(
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(background)
-            .border(1.dp, borderColor, CircleShape)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(label, color = Color.White, fontWeight = FontWeight.SemiBold)
-    }
+private fun ModernChip(
+    selected: Boolean,
+    label: String,
+    onClick: () -> Unit
+) {
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label, fontWeight = FontWeight.SemiBold) },
+        colors = FilterChipDefaults.filterChipColors(
+            selectedContainerColor = AiPalette.Primary,
+            selectedLabelColor = Color.White,
+            containerColor = AiPalette.SurfaceLight,
+            labelColor = AiPalette.OnGradient.copy(alpha = 0.8f)
+        ),
+        border = null,
+        shape = MaterialTheme.shapes.medium
+    )
 }
 
 @Composable
-private fun onboardingCardColors() = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.08f))
-
-@Composable
-private fun onboardingCardElevation() = CardDefaults.cardElevation(defaultElevation = 8.dp)
-
+private fun ModernToggleChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    val background = if (selected) AiPalette.Primary else AiPalette.SurfaceLight
+    val textColor = if (selected) Color.White else AiPalette.OnGradient.copy(alpha = 0.8f)
+    
+    Box(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .background(background)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(label, color = textColor, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
+    }
+}

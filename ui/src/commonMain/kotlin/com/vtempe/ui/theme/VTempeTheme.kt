@@ -1,4 +1,4 @@
-﻿package com.vtempe.ui.theme
+package com.vtempe.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
@@ -20,7 +20,7 @@ fun VTempeTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = AiTypography,
+        typography = AiTypography(),
         shapes = AiShapes,
         content = content
     )
