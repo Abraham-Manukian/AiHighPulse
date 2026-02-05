@@ -1,4 +1,4 @@
-﻿package com.vtempe.server.llm
+﻿package com.vtempe.server.features.ai.data.llm
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex

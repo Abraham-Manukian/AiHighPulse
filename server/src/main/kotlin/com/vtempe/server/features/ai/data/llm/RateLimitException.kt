@@ -1,4 +1,4 @@
-﻿package com.vtempe.server.llm
+﻿package com.vtempe.server.features.ai.data.llm
 
 /**
  * Indicates that the upstream LLM rejected a request due to rate limiting.

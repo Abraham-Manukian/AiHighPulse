@@ -1,8 +1,8 @@
-﻿package com.vtempe.server.llm
+﻿package com.vtempe.server.features.ai.data.llm
 
-import com.vtempe.server.llm.dto.ChatCompletionRequestDto
-import com.vtempe.server.llm.dto.ChatCompletionResponseDto
-import com.vtempe.server.llm.dto.ChatMessageDto
+import com.vtempe.server.features.ai.data.llm.dto.ChatCompletionRequestDto
+import com.vtempe.server.features.ai.data.llm.dto.ChatCompletionResponseDto
+import com.vtempe.server.features.ai.data.llm.dto.ChatMessageDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp

@@ -1,11 +1,18 @@
-﻿package com.vtempe.server
+﻿package com.vtempe.server.features.ai.data.service
 
-import com.vtempe.server.llm.LLMClient
-import com.vtempe.server.llm.LlmRepairer
+import com.vtempe.server.shared.dto.advice.AiAdviceRequest
+import com.vtempe.server.shared.dto.bootstrap.AiBootstrapRequest
+import com.vtempe.server.shared.dto.bootstrap.AiBootstrapResponse
+import com.vtempe.server.shared.dto.chat.AiChatRequest
+import com.vtempe.server.shared.dto.chat.AiChatResponse
+import com.vtempe.server.shared.dto.nutrition.AiNutritionRequest
+import com.vtempe.server.shared.dto.profile.AiProfile
+import com.vtempe.server.shared.dto.training.AiTrainingRequest
+import com.vtempe.server.features.ai.data.llm.LLMClient
+import com.vtempe.server.features.ai.data.llm.LlmRepairer
 import java.util.Locale
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
 import kotlin.collections.buildList
 import org.slf4j.LoggerFactory
 
@@ -107,9 +114,19 @@ class ChatService(
     }.getOrElse {
         logger.warn("Bootstrap bundle failed", it)
         AiBootstrapResponse(
-            trainingPlan = aiService.training(AiTrainingRequest(req.profile, req.weekIndex, req.locale)),
-            nutritionPlan = aiService.nutrition(AiNutritionRequest(req.profile, req.weekIndex, req.locale)),
-            sleepAdvice = aiService.sleep(AiAdviceRequest(req.profile, req.locale))
+            trainingPlan = aiService.training(
+                AiTrainingRequest(
+                    req.profile,
+                    req.weekIndex
+                )
+            ),
+            nutritionPlan = aiService.nutrition(
+                AiNutritionRequest(
+                    req.profile,
+                    req.weekIndex
+                )
+            ),
+            sleepAdvice = aiService.sleep(AiAdviceRequest(req.profile))
         )
     }
 
@@ -213,4 +230,3 @@ private fun normalizeChatResponse(response: AiChatResponse, locale: Locale): AiC
     nutritionPlan = response.nutritionPlan?.let { normalizeNutritionPlan(it, locale) },
     sleepAdvice = response.sleepAdvice?.let(::normalizeAdvice)
 )
-

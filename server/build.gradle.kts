@@ -16,6 +16,10 @@ dependencies {
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.contentnegotiation)
+    implementation(libs.koin.core)
+    implementation(libs.koin.ktor)
+    implementation(libs.koin.logger.slf4j)
+
 }
 
 kotlin {
@@ -23,6 +27,6 @@ kotlin {
 }
 
 application {
-    mainClass.set("com.vtempe.server.ApplicationKt")
+    mainClass.set("com.vtempe.server.app.ApplicationKt")
 }
 

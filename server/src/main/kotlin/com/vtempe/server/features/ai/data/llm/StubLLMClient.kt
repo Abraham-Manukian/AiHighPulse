@@ -1,4 +1,4 @@
-﻿package com.vtempe.server.llm
+﻿package com.vtempe.server.features.ai.data.llm
 
 class StubLLMClient(private val message: String) : LLMClient {
     override suspend fun generateJson(prompt: String): String {

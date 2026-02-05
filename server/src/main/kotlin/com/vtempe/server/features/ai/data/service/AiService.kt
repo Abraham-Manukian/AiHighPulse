@@ -1,7 +1,20 @@
-﻿package com.vtempe.server
+﻿package com.vtempe.server.features.ai.data.service
 
-import com.vtempe.server.llm.LLMClient
-import com.vtempe.server.llm.LlmRepairer
+import com.vtempe.server.shared.dto.advice.AiAdviceRequest
+import com.vtempe.server.shared.dto.advice.AiAdviceResponse
+import com.vtempe.server.shared.dto.bootstrap.AiBootstrapRequest
+import com.vtempe.server.shared.dto.bootstrap.AiBootstrapResponse
+import com.vtempe.server.shared.dto.nutrition.AiMeal
+import com.vtempe.server.shared.dto.nutrition.AiNutritionRequest
+import com.vtempe.server.shared.dto.nutrition.AiNutritionResponse
+import com.vtempe.server.shared.dto.nutrition.Macros
+import com.vtempe.server.shared.dto.profile.AiProfile
+import com.vtempe.server.shared.dto.training.AiSet
+import com.vtempe.server.shared.dto.training.AiTrainingRequest
+import com.vtempe.server.shared.dto.training.AiTrainingResponse
+import com.vtempe.server.shared.dto.training.AiWorkout
+import com.vtempe.server.features.ai.data.llm.LLMClient
+import com.vtempe.server.features.ai.data.llm.LlmRepairer
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import java.time.DayOfWeek
@@ -17,7 +30,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
@@ -32,7 +44,7 @@ class AiService(private val llm: LLMClient) {
         operation = "training",
         fallback = { fallbackTraining(req) }
     ) {
-        fetchBundle(req.profile, req.weekIndex, req.locale).trainingPlan
+        fetchBundle(req.profile, req.weekIndex, req.profile.locale).trainingPlan
             ?: throw IllegalStateException("trainingPlan missing in bundle")
     }
 
@@ -40,7 +52,7 @@ class AiService(private val llm: LLMClient) {
         operation = "nutrition",
         fallback = { fallbackNutrition(req) }
     ) {
-        fetchBundle(req.profile, req.weekIndex, req.locale).nutritionPlan
+        fetchBundle(req.profile, req.weekIndex, req.profile.locale).nutritionPlan
             ?: throw IllegalStateException("nutritionPlan missing in bundle")
     }
 
@@ -48,7 +60,7 @@ class AiService(private val llm: LLMClient) {
         operation = "sleep",
         fallback = { fallbackAdvice(req) }
     ) {
-        fetchBundle(req.profile, 0, req.locale).sleepAdvice
+        fetchBundle(req.profile, 0, req.profile.locale).sleepAdvice
             ?: throw IllegalStateException("sleepAdvice missing in bundle")
     }
 
@@ -56,9 +68,19 @@ class AiService(private val llm: LLMClient) {
         operation = "bundle",
         fallback = {
             AiBootstrapResponse(
-                trainingPlan = fallbackTraining(AiTrainingRequest(req.profile, req.weekIndex, req.locale)),
-                nutritionPlan = fallbackNutrition(AiNutritionRequest(req.profile, req.weekIndex, req.locale)),
-                sleepAdvice = fallbackAdvice(AiAdviceRequest(req.profile, req.locale))
+                trainingPlan = fallbackTraining(
+                    AiTrainingRequest(
+                        req.profile,
+                        req.weekIndex
+                    )
+                ),
+                nutritionPlan = fallbackNutrition(
+                    AiNutritionRequest(
+                        req.profile,
+                        req.weekIndex
+                    )
+                ),
+                sleepAdvice = fallbackAdvice(AiAdviceRequest(req.profile))
             )
         }
     ) {
@@ -197,9 +219,9 @@ class AiService(private val llm: LLMClient) {
             appendLine("TRAINING_JSON")
             appendLine("{\"weekIndex\":0,\"workouts\":[{\"id\":\"w_0_0\",\"date\":\"2025-01-06\",\"sets\":[{\"exerciseId\":\"squat\",\"reps\":8,\"weightKg\":60.0,\"rpe\":7.5}]}]}")
             appendLine("NUTRITION_JSON")
-            appendLine("{\"weekIndex\":0,\"mealsByDay\":{\"Mon\":[{\"name\":\"\\u041e\\u0432\\u0441\\u044f\\u043d\\u043a\\u0430 \\u0441 \\u044f\\u0433\\u043e\\0434\\u0430\\043c\\u0438\",\"ingredients\":[\"\\u043e\\u0432\\u0441\\u044f\\u043d\\u044b\\u0435 \\u0445\\u043b\\u043e\\043f\\u044c\\u044f\",\"\\u043c\\u043e\\u043b\\043e\\043a\\043e\",\"\\u044f\\u0433\\u043e\\0434\\044b\"],\"kcal\":420,\"macros\":{\"proteinGrams\":35,\"fatGrams\":12,\"carbsGrams\":55,\"kcal\":420}}]}}");
+            appendLine("{\"weekIndex\":0,\"mealsByDay\":{\"Mon\":[{\"name\":\"\\u041e\\u0432\\u0441\\u044f\\u043d\\u043a\\u0430 \\u0441 \\u044f\\u0433\\u043e\\u0434\\u0430\\u043c\\u0438\",\"ingredients\":[\"\\u043e\\u0432\\u0441\\u044f\\u043d\\u044b\\u0435 \\u0445\\u043b\\u043e\\u043f\\u044c\\u044f\",\"\\u043c\\u043e\\u043b\\u043e\\u043a\\u043e\",\"\\u044f\\u0433\\u043e\\u0434\\u044b\"],\"kcal\":420,\"macros\":{\"proteinGrams\":35,\"fatGrams\":12,\"carbsGrams\":55,\"kcal\":420}}]}}");
             appendLine("SLEEP_JSON")
-            appendLine("{\"messages\":[\"\\u041b\\u043e\\u0436\\u0438\\u0442\\u0435\\u0441\\u044c \\u0438 \\u043f\\u0440\\u043e\\u0441\\u044b\\u043f\\u0430\\u0439\\u0442\\u0435\\u0441\\u044c \\u0432 \\u043e\\u0434\\u043d\\u043e \\u0438 \\u0442\\u043e \\u0436\\u0435 \\u0432\\u0440\\u0435\\043c\\u044f.\"],\"disclaimer\":\"\\u0421\\u043e\\u0432\\u0435\\u0442\\u044b \\u043d\\u0435 \\u0437\\u0430\\043c\\u0435\\043d\\u044f\\044e\\0442 \\u0432\\u0440\\u0430\\0447\\0430. \\u041f\\u0440\\u0438 \\u043f\\u0440\\u043e\\0431\\043b\\0435\\043c\\0430\\0445 \\u043e\\u0431\\u0440\\u0430\\0442\\0438\\0442\\0435\\0441\\044c \\u043a \\u0441\\u043f\\u0435\\0446\\u0438\\0430\\043b\\0438\\0441\\0442\\0443.\"}")
+            appendLine("{\"messages\":[\"\\u041b\\u043e\\u0436\\u0438\\u0442\\u0435\\u0441\u044c \\u0438 \\u043f\\u0440\u043e\u0441\u044b\u043f\u0430\\u0439\u0442\u0435\u0441\u044c \\u0432 \\u043e\u0434\u043d\u043e \\u0438 \\u0442\u043e \\u0436\\u0435 \\u0432\u0440\u0435\u043c\u044f.\"],\"disclaimer\":\"\\u0421\\u043e\\u0432\u0435\u0442\u044b \\u043d\\u0435 \\u0437\\u0430\u043c\u0435\u043d\u044f\\u044e\u0442 \\u0432\u0440\u0430\u0447\u0430. \\u041f\u0440\u0438 \\u043f\u0440\u043e\u0431\u043b\u0435\u043c\u0430\u0445 \\u043e\u0431\u0440\u0430\u0442\u0438\u0442\u0435\u0441\u044c \\u043a \\u0441\u043f\u0435\u0446\u0438\u0430\u043b\u0438\u0441\u0442\u0443.\"}")
             appendLine("All arrays must close properly. No missing commas, no trailing commas, no duplicated braces.")
             appendLine()
             appendLine("TRAINING RULES:")
@@ -271,7 +293,7 @@ class AiService(private val llm: LLMClient) {
         if (profile.allergies.isNotEmpty()) {
             appendLine("- Allergies to avoid: ${profile.allergies.joinToString(", ")}")
         }
-        appendLine("- Nutrition budget level (1 low .. 3 high): ${profile.budgetLevel}")
+        appendLine("- Nutrition budget level (1 low .. 3 high): ${profile.budgetLevel ?: 2}")
     }
 
     private fun extractTextSignals(response: AiBootstrapResponse): List<String> = buildList {
@@ -285,12 +307,10 @@ class AiService(private val llm: LLMClient) {
             })
         }
         response.nutritionPlan?.let { plan ->
-            addAll(plan.mealsByDay.values.flatMap { meals ->
-                meals.flatMap { meal ->
-                    buildList {
-                        add(meal.name)
-                        addAll(meal.ingredients)
-                    }
+            addAll(plan.mealsByDay.values.flatten().flatMap { meal ->
+                buildList {
+                    add(meal.name)
+                    addAll(meal.ingredients)
                 }
             })
             addAll(plan.shoppingList)
@@ -306,7 +326,11 @@ class AiService(private val llm: LLMClient) {
         val training = json.decodeFromString(AiTrainingResponse.serializer(), sections.training)
         val nutrition = json.decodeFromString(AiNutritionResponse.serializer(), sections.nutrition)
         val sleep = json.decodeFromString(AiAdviceResponse.serializer(), sections.sleep)
-        return AiBootstrapResponse(trainingPlan = training, nutritionPlan = nutrition, sleepAdvice = sleep)
+        return AiBootstrapResponse(
+            trainingPlan = training,
+            nutritionPlan = nutrition,
+            sleepAdvice = sleep
+        )
     }
 
     private data class BundleSections(val training: String, val nutrition: String, val sleep: String)
@@ -390,7 +414,7 @@ class AiService(private val llm: LLMClient) {
     }
 
     private fun fallbackTraining(req: AiTrainingRequest): AiTrainingResponse {
-        val locale = safeLocale(req.locale)
+        val locale = safeLocale(req.profile.locale)
         val today = LocalDate.now(ZoneOffset.UTC)
         fun set(id: String, reps: Int, weight: Double?, rpe: Double?) =
             AiSet(localizedExerciseLabel(id, locale), reps, weight, rpe)
@@ -421,7 +445,7 @@ class AiService(private val llm: LLMClient) {
     }
 
     private fun fallbackNutrition(req: AiNutritionRequest): AiNutritionResponse {
-        val locale = safeLocale(req.locale)
+        val locale = safeLocale(req.profile.locale)
         val meals = templateMeals(locale)
         val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
         val planMeals = days.associateWith { day -> if (day == "Sun") meals.take(3) else meals }
@@ -434,7 +458,7 @@ class AiService(private val llm: LLMClient) {
     }
 
     private fun fallbackAdvice(req: AiAdviceRequest): AiAdviceResponse {
-        val locale = safeLocale(req.locale)
+        val locale = safeLocale(req.profile.locale)
         val isRu = locale.language.equals("ru", ignoreCase = true)
         val messages = if (isRu) {
             listOf(

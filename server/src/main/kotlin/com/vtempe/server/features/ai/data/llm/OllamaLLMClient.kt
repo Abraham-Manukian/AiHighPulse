@@ -1,4 +1,4 @@
-﻿package com.vtempe.server.llm
+﻿package com.vtempe.server.features.ai.data.llm
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

@@ -1,4 +1,4 @@
-﻿package com.vtempe.server.llm
+﻿package com.vtempe.server.features.ai.data.llm
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -8,7 +8,6 @@ import java.nio.file.StandardOpenOption
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
-import kotlinx.serialization.SerializationException
 import kotlin.collections.linkedSetOf
 import org.slf4j.Logger
 

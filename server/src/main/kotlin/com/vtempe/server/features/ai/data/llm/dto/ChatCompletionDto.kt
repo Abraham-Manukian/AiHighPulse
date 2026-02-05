@@ -1,4 +1,4 @@
-﻿package com.vtempe.server.llm.dto
+﻿package com.vtempe.server.features.ai.data.llm.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
